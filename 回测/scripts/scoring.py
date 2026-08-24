@@ -287,8 +287,9 @@ def six_lights(row: dict, tre_state: str, obs_active: bool, s3_limit_ok: bool,
     # 第4灯 信号时效性 R≤25%  (v5.0 #167: 个股通道 R值C级经MIN③降权, 不再判灯❌=否决)
     ok4 = r_level in ("A", "B") or (r_level == "C" and os.environ.get("BT_STOCKCHANNEL_V5", "0") == "1")
     lights.append(f"第4灯{'✅' if ok4 else '❌'}(信号{r_level}级{'·v5降权' if r_level=='C' else ''})")
-    # 第5灯 组合风控
-    ok5 = (n_hold < 5) and (n_same_ind < 2) and (beta < 1.2)
+    # 第5灯 组合风控 —— 【去冗余·冗余1】SSOT combo_balance_ok（六灯第5灯≡七灯第7灯 同源, 行为零变化）
+    _dup1 = os.environ.get("BT_DUP1_VARIANT", "1")   # 默认1=SSOT合并; "0"=原内联(等价验证用)
+    ok5 = (n_hold < 5) and (n_same_ind < 2) and (beta < 1.2) if _dup1 == "0" else combo_balance_ok(n_hold, n_same_ind, beta)
     lights.append(f"第5灯{'✅' if ok5 else '❌'}(持仓{n_hold}/同业{n_same_ind}/Beta{beta:.2f})")
     # 第6灯 TRE状态适配（引用同一 tre_gate_kind，见上方冗余5合并）
     lights.append({
@@ -343,7 +344,9 @@ def seven_lights(row: dict, tre_state: str, obs_active: bool, n_hold: int,
         lights.append(f"第5灯{'✅' if ok5 else '❌'}(近90日破位{ma60_break90}次, {'行业≤3' if ind_etf else '≤1'})")
     ok6 = True  # ETF信号时效=入选观察池日已过, 恒A级 [文档3.5]
     lights.append(f"第6灯{'✅' if ok6 else '❌'}(信号A级=入池有效)")
-    ok7 = (n_hold < 5) and (n_same_ind < 2) and (beta < 1.2)
+    # 七灯第7灯 组合风控 —— 【去冗余·冗余1】SSOT combo_balance_ok（与六灯第5灯同源）
+    _dup1 = os.environ.get("BT_DUP1_VARIANT", "1")   # 默认1=SSOT合并; "0"=原内联(等价验证用)
+    ok7 = (n_hold < 5) and (n_same_ind < 2) and (beta < 1.2) if _dup1 == "0" else combo_balance_ok(n_hold, n_same_ind, beta)
     lights.append(f"第7灯{'✅' if ok7 else '❌'}(持仓{n_hold}/同业{n_same_ind}/Beta{beta:.2f})")
     all_green = all("❌" not in x for x in lights)
     return all_green, lights
@@ -444,6 +447,18 @@ def f04(min_pct: float, atr_scale: float, liq_cap: float) -> float:
     """F-04: 最终可执行仓位% = MIN(MIN结果×ATR缩放, 12%初次, 流动性分层, 15%总硬上限); <3%放弃"""
     v = min(min_pct * atr_scale, 12.0, liq_cap, 15.0)
     return v if v >= 3.0 else 0.0
+
+
+def combo_balance_ok(n_hold: int, n_same_ind: int, beta: float) -> bool:
+    """SSOT 组合风控（附录E 冗余1）：六灯第5灯 ≡ 七灯第7灯 同一组合约束，消除两灯内联重复公式。
+
+    约束：持仓数 < 5 且 同业持仓 < 2 且 组合Beta < 1.2。
+    设计：原 six_lights(第5灯) 与 seven_lights(第7灯) 各自内联同一公式；现统一引用此函数（行为零变化）。
+    注：run_backtest 组合约束层(L763 持仓<5/同业<2) 与 组合均衡(补丁②: 总仓位压缩/行业>30%) 为组合级执行点；
+        第5灯/第7灯 的 per-symbol 组合风控（含 Beta<1.2 = 冗余6 的 8.4 Beta分级）现经此 SSOT 收敛，
+        冗余6「仓位引擎」的 Beta分级并入。动态回撤阶梯(P12v6) 属离场引擎，按设计独立保留。
+    """
+    return (n_hold < 5) and (n_same_ind < 2) and (beta < 1.2)
 
 
 # ================= 去冗余·冗余2：SSOT 趋势位置校验（2026-08-24 提前回测） =================
