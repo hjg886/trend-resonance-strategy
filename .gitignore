@@ -1,0 +1,7 @@
+.workbuddy/
+__pycache__/
+*.pyc
+*.bak_*
+回测/data/
+回测/output/
+回测/tmp/

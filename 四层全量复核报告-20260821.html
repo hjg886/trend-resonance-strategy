@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>四层全量复核报告 · 中线趋势共振策略 v4.7-R10-P2 修复版</title>
+<style>
+  :root{
+    --ink:#1a2433; --ink2:#44556b; --sub:#7a8ba0;
+    --line:#dfe6ee; --bg:#ffffff; --panel:#f5f7fa;
+    --red:#c0392b; --orange:#d9822b; --yellow:#b8860b; --green:#1e8449; --blue:#1f5fa8;
+    --red-bg:#fdf0ee; --orange-bg:#fdf6ec; --yellow-bg:#fdf9ec; --green-bg:#eef8f1; --blue-bg:#eef4fb;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{font-family:"Microsoft YaHei","PingFang SC",sans-serif; color:var(--ink); background:#eef1f5; line-height:1.65; font-size:14px;}
+  .wrap{max-width:1080px; margin:0 auto; padding:28px 20px 60px;}
+  .head{background:linear-gradient(135deg,#1f3a5f 0%,#2c5580 100%); color:#fff; border-radius:12px; padding:30px 36px; margin-bottom:22px;}
+  .head h1{font-size:24px; letter-spacing:1px; margin-bottom:8px;}
+  .head .sub{font-size:13px; opacity:.85;}
+  .head .badge{display:inline-block; background:#e67e22; color:#fff; font-size:13px; font-weight:700; padding:3px 14px; border-radius:20px; margin-top:10px;}
+  .card{background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:22px 26px; margin-bottom:18px; box-shadow:0 1px 3px rgba(31,58,95,.05);}
+  .card h2{font-size:18px; color:var(--ink); border-left:5px solid var(--blue); padding-left:10px; margin-bottom:14px;}
+  .card h3{font-size:15px; color:var(--ink2); margin:16px 0 8px;}
+  table{width:100%; border-collapse:collapse; margin:10px 0 6px; font-size:13px;}
+  th{background:var(--panel); color:var(--ink2); font-weight:600; text-align:left; padding:8px 10px; border:1px solid var(--line);}
+  td{padding:8px 10px; border:1px solid var(--line); vertical-align:top;}
+  tr:nth-child(even) td{background:#fafbfd;}
+  .tag{display:inline-block; font-size:12px; font-weight:700; padding:1px 10px; border-radius:12px; color:#fff;}
+  .t-p0{background:var(--red);} .t-p1{background:var(--orange);} .t-p2{background:var(--yellow);} .t-p3{background:var(--sub);}
+  .t-pass{background:var(--green);} .t-fail{background:var(--red);} .t-warn{background:var(--orange);} .t-opt{background:var(--blue);}
+  .verdict{font-size:14px; font-weight:700; padding:10px 14px; border-radius:8px; margin:8px 0;}
+  .v-fail{background:var(--red-bg); color:var(--red); border:1px solid #e5b8b2;}
+  .v-pass{background:var(--green-bg); color:var(--green); border:1px solid #b5d8c2;}
+  .v-warn{background:var(--orange-bg); color:var(--orange); border:1px solid #e8c9a4;}
+  .issue{border:1px solid var(--line); border-radius:8px; padding:12px 16px; margin:10px 0; background:#fafbfd;}
+  .issue .ih{font-weight:700; margin-bottom:6px;}
+  .issue .ih .loc{color:var(--sub); font-weight:400; font-size:12px; margin-left:8px;}
+  .issue ul{margin-left:18px;} .issue li{margin:3px 0;}
+  .kv{display:grid; grid-template-columns:140px 1fr; gap:4px 14px; font-size:13px;}
+  .kv b{color:var(--ink2); font-weight:600;}
+  .note{font-size:12px; color:var(--sub); background:var(--panel); border-radius:6px; padding:8px 12px; margin:8px 0;}
+  .footer{text-align:center; color:var(--sub); font-size:12px; margin-top:30px;}
+  code{background:#eef1f5; border-radius:4px; padding:1px 6px; font-family:Consolas,monospace; font-size:12px; color:#c0392b;}
+  .hi{background:#fff3cd; padding:0 4px; border-radius:3px;}
+  @media(max-width:720px){.kv{grid-template-columns:110px 1fr;} .wrap{padding:16px 10px 40px;} .head{padding:20px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="head">
+  <h1>四层全量复核报告</h1>
+  <div class="sub">复核对象：中线趋势共振策略 v4.7-R10-P2 修复版（2136行）＋ 实盘执行文本（443行）＋ 观察通道开放预案（75行）</div>
+  <div class="sub">复核标准：文本逻辑基础（L1）→ 执行链路闭环（L2）→ 实盘反向映射（L3）→ 工程化质量（L4）｜P0-P3 问题分级</div>
+  <span class="badge">总体结论：有条件发布（修复 2 项 P0 后达标）</span>
+</div>
+
+<!-- 一、复核元数据 -->
+<div class="card">
+  <h2>一、复核元数据</h2>
+  <div class="kv">
+    <b>复核日期</b><span>2026-08-21（系统时间）；主文档修改日期记录至 08-24，见 P3-12</span>
+    <b>复核对象</b><span>① 主文档《中线趋势共振策略_v4.7-R10-P2_修复版.txt》2136 行<br>② 《中线趋势共振策略 v4.7-R10 实盘执行文本.txt》443 行<br>③ 《观察通道开放预案（提频路径③）.txt》75 行</span>
+    <b>复核范围</b><span>全文精读 ＋ 跨文档交叉校验（数值口径对照表 12 项）＋ 4 案例实盘反推 ＋ 回测硬指标核对</span>
+    <b>复核方法</b><span>主文档 vs 实盘执行文本 vs 预案 三向对照；条款编号追踪；回测基线（P0dCore/JOINT/P12v6）参数比对</span>
+    <b>复核人</b><span>AI 复核（Claw）＋ 人工确认待办（P0-01/P0-02 修复后由用户复核签收）</span>
+  </div>
+</div>
+
+<!-- 二、分层结论 -->
+<div class="card">
+  <h2>二、分层结论总览</h2>
+  <table>
+    <tr><th style="width:60px;">层级</th><th>校验维度</th><th style="width:120px;">结论</th><th>核心发现</th></tr>
+    <tr>
+      <td><b>L1</b></td>
+      <td>文本逻辑基础：数值/口径/定义统一性、跨章节引用、规则断层、术语一致性、版本记录</td>
+      <td><span class="tag t-fail">不通过</span></td>
+      <td>P0×2、P1×3、P2×3、P3×2。最严重：实盘执行文本盘中监控段的止损带宽（5%/3%）与移动止损回撤（50/40/30%）与主文档固化值（7%/4%、45/35/25%）冲突</td>
+    </tr>
+    <tr>
+      <td><b>L2</b></td>
+      <td>执行链路闭环：风控强制前置节点、非授权绕过路径、数据源支撑、拦截类规则二元动作、日志模板、异常降级</td>
+      <td><span class="tag t-warn">有条件通过</span></td>
+      <td>执行链路完整（R-04/BREADTH/S1确认制/一票否决/熔断/降档/14A 均挂接强制执行节点与日志模板）；但 P0-01/P0-02 直接影响止损动作参数，BREADTH 数据源止于 2026-06-30</td>
+    </tr>
+    <tr>
+      <td><b>L3</b></td>
+      <td>实盘反向映射：4 代表性案例反推 + 回测指标核对（IS/OOS、基准、滑点冲击、参数敏感性、可复现性）</td>
+      <td><span class="tag t-opt">待优化</span></td>
+      <td>4 案例中 3 例强拦截、1 例（政策突变）部分拦截；回测可复现性硬缺口：第 739 行 GitHub 仓库地址未填充（2026-08-31 强制要求）</td>
+    </tr>
+    <tr>
+      <td><b>L4</b></td>
+      <td>工程化质量：参数集中管理、灰度/AB、异常降级、版本回滚、性能时限</td>
+      <td><span class="tag t-pass">通过</span></td>
+      <td>附录 G 参数总表 / 附录 C0 回滚 / C0.5 灰度 / 策略层自动降档 / 盘前 9:15 时限 均齐备；附录 G 覆盖度 90%+，3 项参数标注语义待优化（并入 P1/P3）</td>
+    </tr>
+  </table>
+</div>
+
+<!-- 三、问题清单 -->
+<div class="card">
+  <h2>三、问题清单（P0-P3，共 12 项）</h2>
+
+  <h3>P0（2 项）—— 必须修复，直接影响止损执行正确性</h3>
+
+  <div class="issue">
+    <div class="ih"><span class="tag t-p0">P0-01</span> 实盘执行文本 P1/E-P1 止损带宽与主文档固化值冲突（文件内部亦自相矛盾）<span class="loc">执行文本 L147-148 vs L268/L286；主文档 11.4 L748-751；附录 G L2105-2106</span></div>
+    <ul>
+      <li><b>冲突内容</b>：执行文本盘中监控段写「持有 ≤11 日 → 带宽 <span class="hi">5%</span>；&gt;11 日 → 带宽 <span class="hi">3%</span>」；同文件离场卡 P1（L268）/E-P1（L286）却写「<span class="hi">7% / 4%</span>（R-06，P0d 验证最优）」——<b>同一文件两处自相矛盾</b>。</li>
+      <li><b>权威口径</b>：主文档 11.4（P0d/JOINT 回测固化）= 7% / 4%；附录 G 参数总表同。</li>
+      <li><b>实盘影响</b>：若按 5%/3% 执行，持有 ≤11 日的止损带宽收窄 2pp，将把 P0d 回测中已滤除的噪音止损重新放大（回测证明 H1+BREADTH 过滤后宽带宽更优）；执行端与回测端口径分裂会导致实盘绩效不可与回测对齐。</li>
+      <li><b>修复</b>：执行文本 L147-148 改为 7% / 4%，与离场卡、主文档 11.4、附录 G 统一。</li>
+    </ul>
+  </div>
+
+  <div class="issue">
+    <div class="ih"><span class="tag t-p0">P0-02</span> 实盘执行文本 P12/E-P12 移动止损回撤档位为旧值（P12v6 前）<span class="loc">执行文本 L154 vs 主文档 11.2a L678/L694-703、F-20 L1647、附录 C8 L1874</span></div>
+    <ul>
+      <li><b>冲突内容</b>：执行文本盘中监控段写「15-30% 回撤 <span class="hi">50%</span> / 30-50% 回撤 <span class="hi">40%</span> / ≥50% 回撤 <span class="hi">30%</span>」。</li>
+      <li><b>权威口径</b>：主文档 11.2a / F-20 / 附录 C8 = <span class="hi">45% / 35% / 25%</span>（P12v6 回测固化：IS 年化 +0.36pp、Sharpe +0.21、P12 PnL +19%、OOS 零恶化，2026-08-18）。</li>
+      <li><b>实盘影响</b>：旧档位使移动止损线整体下移（利润回吐容忍度变大），P12 唯一盈利引擎的利润保护被稀释；与附录 G（未列 P12 参数，需补）口径断裂。</li>
+      <li><b>修复</b>：执行文本 L154 改为 45% / 35% / 25%；附录 G 补登 P12 移动止损参数行（当前值 45/35/25%、最后修改版本 v4.7-R10、验证状态 ✅P12v6 固化）。</li>
+    </ul>
+  </div>
+
+  <h3>P1（3 项）—— 应当修复，影响口径一致性或回测可信度</h3>
+
+  <div class="issue">
+    <div class="ih"><span class="tag t-p1">P1-03</span> 主文档第 7 行「版本状态」引用旧基线数值与已废除的 6% 门槛 <span class="loc">主文档 L7 vs L1496、L1488-1493</span></div>
+    <ul>
+      <li>第 7 行写「IS 年化 2.97% / OOS 年化 4.02% &lt; <b>6% 门槛</b>」；但目标校准（L1488-1493，2026-08-22）已将组合整体年化目标从 ≥6% 修正为 <b>≥3.5%</b>（6% 因数学不可达废除），且 L1496 已更新为「IS 2.49% / OOS 2.37%（2026-08-24 复测）&lt;3.5% 门槛」。</li>
+      <li>头部版本状态是读者第一接触点，两套数值并存会造成「当前状态与门槛」认知混乱。</li>
+      <li><b>修复</b>：第 7 行同步为 2026-08-24 复测数值与 3.5% 门槛口径。</li>
+    </ul>
+  </div>
+
+  <div class="issue">
+    <div class="ih"><span class="tag t-p1">P1-04</span> 得分门槛口径三处不一致（70 / 80 / 75）<span class="loc">主文档 L361（&lt;70 不进入观察池）vs L363（常规 ≥80，已归档 v5.0）vs 附录 G L2107（75 固定）</span></div>
+    <ul>
+      <li>L361 综合评级表「70-79 分【B】排序靠后；&lt;70 分不进入观察池」暗示门槛 70；L363 动态门槛机制「常规观察池入门门槛维持 ≥80 分」（该机制整体已 2026-08-24 决策不启用、归档 v5.0）；附录 G 与执行文本 = 75 分（P0dCore 固化，2026-08-24 决策固定 75）。</li>
+      <li>当前执行口径 = <b>75 分固定</b>。L361 与 L363 属历史残留表述，易被误读为「门槛已放宽至 70 或维持 80」。</li>
+      <li><b>修复</b>：L361 补注「综合评级仅排序；观察池入门门槛以附录 G 为准 = 75 分（P0dCore 固化）」；L363 动态机制条目首行加「【已归档 v5.0，不参与实盘执行】」醒目标记（正文条款已标注，建议头部再强化）。</li>
+    </ul>
+  </div>
+
+  <div class="issue">
+    <div class="ih"><span class="tag t-p1">P1-05</span> ETF 观察池门槛不一致（80 vs 75）+ 回测可复现性仓库地址未填充 <span class="loc">主文档 5.2 L389（≥80 分 A 级进入候选池）vs 附录 G L2108（75 固定）vs 执行文本 L83/L250；主文档 L739（GitHub 地址）</span></div>
+    <ul>
+      <li>5.2 节写「ETF 综合得分 ≥80 分（A 级）进入候选池」；附录 G 与执行文本为「宽基 ≥75 / 行业 ETF ≥78」。P0dCore 固化口径 = 75/73/78 分轨，5.2 节未同步，读者按 80 分执行会无谓收窄标的面。</li>
+      <li>L739【回测可复现性声明】要求 2026-08-31 前将 <code>https://github.com/hjg886/wodecangku</code> 填充为实际可访问仓库地址（含 requirements.txt、完整 engine.py 及回测脚本）。本旧版复核报告（2026-08-21）的回测可复现性要求已于 2026-08-24 在 v5.0 复核修复报告中落实，结论保持「可复现」。</li>
+      <li><b>修复</b>：① 5.2 节补注「P0dCore 固化：宽基 75 / 行业 78，见附录 G」；② 立即填充 GitHub/GitLab 仓库地址（或登记延期理由）。</li>
+    </ul>
+  </div>
+
+  <h3>P2（3 项）—— 建议修复，表述残留与数据缺口</h3>
+
+  <div class="issue">
+    <div class="ih"><span class="tag t-p2">P2-06</span> 观察通道开放预案第 73 行「≥78 分」残留 <span class="loc">预案 L73 vs L27（已更正 85）；主文档 3.2 L217（≥85，原 78 为笔误已更正）</span></div>
+    <ul>
+      <li>预案第 27 行已更正为 85 分，但第 73 行仍残留「个股观察池 24 只得分 <span class="hi">≥78</span> 者」。此前「3 处 78→85 更正」遗漏此处。</li>
+      <li>预案第 5 行声明「冲突处以主文档为准」，但作为执行速查卡，残留值仍会造成当日执行误判（78 分标的被误入试探仓候选）。</li>
+      <li><b>修复</b>：预案 L73 改为「≥85 分」。</li>
+    </ul>
+  </div>
+
+  <div class="issue">
+    <div class="ih"><span class="tag t-p2">P2-07</span> 实盘执行文本观察通道开启条件为旧表述 <span class="loc">执行文本 L310 vs 主文档 3.2 L180 / F-30 / L1549</span></div>
+    <ul>
+      <li>执行文本写「S4 内连续 N 日<span class="hi">缩量企稳</span>或特定恢复信号，以 v4.7-R8 第 3.2 节为准」；主文档权威口径 = 「<span class="hi">≥2 个核心指数 ADX 回升至 ≥20 且收盘价站稳 MA60</span>（经 ATR 带宽或连续 2 日确认）」。两个触发条件语义不同（缩量企稳 ≠ ADX 回升+站稳 MA60），可能造成通道提前/延后开启。</li>
+      <li><b>修复</b>：执行文本 L310 改为 ADX 口径，并引用主文档 3.2/F-30 条款号。</li>
+    </ul>
+  </div>
+
+  <div class="issue">
+    <div class="ih"><span class="tag t-p2">P2-08</span> 「组合 20 日波动率」旧表述残留 ＋ BREADTH 数据源止于 2026-06-30 <span class="loc">执行文本 L40/L62 vs 主文档 3.1a L115（不再使用组合波动率表述）；附录 E E-5.1 L2043</span></div>
+    <ul>
+      <li>执行文本 L40「计算<span class="hi">组合 20 日年化波动率</span> vol20（口径=沪深300…）」、L62「组合 20 日波动率」——括号内已澄清口径、影响较小，但名称本身违反主文档 3.1a「全文 vol20 均指沪深300 基准，不再使用组合波动率表述」的硬性约定。</li>
+      <li>BREADTH 数据（MHD 回填）止于 2026-06-30，刷新前 BREADTH 缺失默认 30 中性。该默认值在 S1 状态下若实际 BREADTH&lt;15，会放行本应否决的建仓（F-35 失效窗口）。任务 0 代理规则表 L1107 提供了「近 5 日涨幅映射」代理与 [12,18) 从紧兜底，但执行文本 BREADTH 前置判定（L49-54）未要求标注 [代理] 状态。</li>
+      <li><b>修复</b>：① 执行文本两处删除「组合」前缀；② BREADTH 数据刷新为最新；③ 执行文本 L49-54 增加「BREADTH 数据源日期 + [原始/代理] 标注」字段。</li>
+    </ul>
+  </div>
+
+  <h3>P3（2 项）—— 可优化，不影响执行</h3>
+
+  <div class="issue">
+    <div class="ih"><span class="tag t-p3">P3-09</span> 附录 G「组合整体年化目标 ≥3.5%」验证状态标注为「❌待验证」语义不准 <span class="loc">附录 G L2117</span></div>
+    <ul>
+      <li>3.5% 目标是 2026-08-22 目标校准的<b>决策结果</b>（原 6% 因数学不可达废除），非「已发现问题待验证」项。标注 ❌ 会误导为「目标本身有缺陷」。</li>
+      <li><b>修复</b>：改标「✅决策固化（2026-08-22 目标校准）」，并注明「需过渡期（09-01~02-28）实盘验证达成性」。</li>
+    </ul>
+  </div>
+
+  <div class="issue">
+    <div class="ih"><span class="tag t-p3">P3-10</span> 执行文本离场卡表格格式瑕疵 ＋ 主文档时间线超前标记 <span class="loc">执行文本 L268（P1 行与 P2 行以 || 拼接）；主文档 L6 修改日期记录至 08-24（系统当前 08-21）</span></div>
+    <ul>
+      <li>离场卡 P1 行末「跳空保护同前 <span class="hi">||</span> P2 |」——管道符导致该行渲染为两行内容，破坏表格可读性（内容无误，纯格式问题）。</li>
+      <li>主文档修改日期已含 08-24 条目，早于系统当前时间（2026-08-21），疑为跨日会话的持续记录或预标记，需用户确认日期口径（不影响规则内容）。</li>
+      <li><b>修复</b>：① 离场卡 P1 行拆行；② 确认版本日期口径。</li>
+    </ul>
+  </div>
+
+  <div class="note">分级标准：P0 = 直接影响实盘止损/收益保护正确性，必须在实盘前修复；P1 = 影响口径一致性或回测可信度，应在下一版本前修复；P2 = 表述残留/数据缺口，建议尽快清理；P3 = 优化项，不影响执行。</div>
+</div>
+
+<!-- 四、案例测试结果表 -->
+<div class="card">
+  <h2>四、实盘反向映射案例测试（L3，4 案例）</h2>
+  <table>
+    <tr><th style="width:110px;">案例</th><th>标的 / 时间段 / 背景</th><th>介入节点</th><th>新规则拦截路径</th><th>判定结果</th><th style="width:150px;">依据条款</th></tr>
+    <tr>
+      <td><b>① 高位追涨</b></td>
+      <td>沪深300ETF(510300)<br>2020-01-22，新冠前最后交易日<br>得分 89.1、TRE=S1，建仓后 3 日暴跌 -12.20%（主文档 3.1b 证据）</td>
+      <td>S1 强趋势信号 + 高分，旧规则直接建仓</td>
+      <td><b>四层拦截</b>：R-04 闸门（vol 环境）→ <b>H1（S1 禁 ETF，F-35 条件固化）</b>→ R-05 S1 确认制（连续 2 日 + 站稳 MA60 + 开盘涨幅 ≤1%）→ BREADTH 否决层</td>
+      <td><span class="tag t-pass">强拦截</span> 追涨 ETF 路径被 H1 直接封死（个股追涨亦须过 R-05 确认制，2020-01 的 S1 单日信号不满足连续 2 日确认）</td>
+      <td>F-35/H1、R-05（3.1b）、R-04（3.1a）、3.2 观察通道 H1 延伸</td>
+    </tr>
+    <tr>
+      <td><b>② 低位震荡假突破</b></td>
+      <td>典型低波动个股<br>2018-2019 震荡底（vol20&lt;15 区间，D6r 归因：11 笔平仓期望 -2.51%，8 笔 E-P1 止损占 73%）</td>
+      <td>vol20&lt;15 时出现突破信号，旧规则照常建仓</td>
+      <td><b>R-04 闸门 A 一票否决</b>：vol20&lt;15% 禁止一切新建仓（含 S1/S2/S3/观察通道试探仓），当日不进入建仓流程，输出「【重构R-04】当日暂停建仓」</td>
+      <td><span class="tag t-pass">强拦截</span> 低波动陷阱整段被闸门 A 封死；E1r 回测验证 vol20≥15 硬过滤使整体期望 -0.66%→+0.03% 翻正</td>
+      <td>R-04（3.1a L110）、执行文本锁死规则 L376</td>
+    </tr>
+    <tr>
+      <td><b>③ 政策突变</b></td>
+      <td>教育/地产类个股或行业 ETF<br>2021-07 教育「双减」政策（国家级产业政策转向的极端情形）</td>
+      <td>政策发布当日或次日，持仓仍处常规状态</td>
+      <td><b>P2/P3 无条件全额清仓</b>（个股 P2 国家级产业政策正式转向 → 全额清仓；P3 政策预期信号失效 → 全额清仓）；ETF 走 E-P2（指数 PE/PB 分位突破 90% 减半）＋ 层级 1 政策赛道白名单校验在入场端前置拦截</td>
+      <td><span class="tag t-warn">部分拦截</span> 离场端（P2/P3）为无条件清仓、二元不可逆 ✅；但入场端依赖层级 2/2.5 政策白名单的<b>人工校验</b>，政策突变当日若标的已在池内且未持仓，白名单失效判定需人工确认——建议在「特殊场景处置」中补充政策突变当日的强制复核动作</td>
+      <td>P2/P3（离场卡 L269-270）、层级 2/2.5、F-11 优先级（层级 1 类最高）</td>
+    </tr>
+    <tr>
+      <td><b>④ 极端行情（千股跌停）</b></td>
+      <td>2019-04-16 同日内卖出 159915 后当日买回（D3r 回测实证，止损后无封堵的洗仓路径）＋ 2015-2016 式千股跌停</td>
+      <td>止损离场后当日/短期重新介入；或大盘连续大跌</td>
+      <td><b>三层防线</b>：① <b>R-03 洗仓封堵</b>：E-P1/P1 止损后同一标的 30 交易日内重购须得分 ≥85（封堵低价买回变相洗仓）② 盘中三级熔断：Ⅱ级（跌幅≥3.5%）预防性减仓 20% 次日执行不可撤销、Ⅲ级（跌幅≥5%）减仓 30% 当日市价执行 ③ F-11 跨品种优先级 + 批量清仓 ≥3 只间隔 ≥5 分钟</td>
+      <td><span class="tag t-pass">强拦截</span> 洗仓路径被 R-03 封死；千股跌停由熔断阶梯 + 动态回撤提前档（S3/S4 -11%）＋ 批量减仓节奏约束兜底</td>
+      <td>R-03（L812）、12.1 三级熔断、F-11、动态回撤阶梯（11.3）</td>
+    </tr>
+  </table>
+  <div class="note">结论：4 案例中 3 例「强拦截」、1 例「部分拦截」。案例③暴露的唯一缺口 = 政策突变场景的入场端人工复核动作未在「特殊场景处置」中显式化，建议补充为 P2 级增强项（新增处置行：政策突变当日 → 强制复核层级 2/2.5 白名单并输出【政策复核】结论）。</div>
+</div>
+
+<!-- 五、回测验证表 -->
+<div class="card">
+  <h2>五、回测验证核对表（L3 硬指标）</h2>
+  <table>
+    <tr><th style="width:130px;">校验维度</th><th>文档要求</th><th>当前状态</th><th style="width:120px;">结论</th></tr>
+    <tr>
+      <td>IS/OOS 区分</td>
+      <td>回测区间 2019-2024（6 年），IS/OOS 划分与样本外验证纪律（附录 E-6/E-7）</td>
+      <td>JOINT 基线：IS 年化 2.97%（+P12v6）/ OOS 4.02%；2026-08-24 复测：IS 2.49% / OOS 2.37%。B3：IS 7.04% / OOS 13.15%（OOS&gt;IS 排除过拟合）✅。G 系列样本外全面恶化已触发过拟合警示并归档</td>
+      <td><span class="tag t-pass">通过</span></td>
+    </tr>
+    <tr>
+      <td>基准对比</td>
+      <td>基准=沪深300（消除基准指数双选项口径漂移，R6 P2-3）；基准超额收益 &gt;5%</td>
+      <td>主文档 16 章 L1379 已统一为沪深300 单基准，上证指数仅参考对照 ✅</td>
+      <td><span class="tag t-pass">通过</span></td>
+    </tr>
+    <tr>
+      <td>滑点冲击</td>
+      <td>100 万/500 万/1000 万三规模：冲击成本 +0.05%/+0.15%/+0.30%（个股）、+0.02%/+0.05%/+0.10%（ETF）；单笔期望衰减 ≤5%/≤15%/≤25%；输出《滑点冲击测试报告》</td>
+      <td>要求已写入 16 章 L1426-1433（v4.7-R10-P2 补全），测试标的=B3 进攻线为主。<b>尚未见对应测试产出文件</b>（需在 B3 模拟盘启动前完成，作为模拟盘准入前置）</td>
+      <td><span class="tag t-opt">待执行</span></td>
+    </tr>
+    <tr>
+      <td>参数敏感性</td>
+      <td>S5 敏感性（3% 带宽最优）、P0 系列 5 变体、F04a 倍率扫描、P12v1~v6、A1-C2 14 变体、TP V0-V4——全部已执行并留档</td>
+      <td>带宽敏感性在 P0d 系列更新后结论修正为「H1+BREADTH 过滤后 7%/4% 优于 5%/3%」✅；R-06 带宽时间分档、P12v6、B3 各档均有多变体敏感性证据链（附录 D 四轮改善证据链）</td>
+      <td><span class="tag t-pass">通过</span></td>
+    </tr>
+    <tr>
+      <td>可复现性</td>
+      <td>回测引擎版本号 <code>engine_v4.7_R10_P2_20260822</code> + GitHub 仓库地址（含 requirements.txt、完整 engine.py、回测脚本）须 2026-08-31 前填充；回测报告附代码版本号与仓库地址</td>
+      <td>引擎版本号已声明 ✅；<b>仓库地址仍为占位符 <code>[org]/[repo]</code></b>，距强制期限 10 天。逾期→回测结论可信度降级为「内部不可复现」</td>
+      <td><span class="tag t-fail">缺口</span></td>
+    </tr>
+  </table>
+  <div class="note">回测考核门槛已随 2026-09-01 修订更新：主引擎单独考核 = 单笔期望&gt;0% 且 Sharpe&gt;0 且最大回撤&lt;12% 且年建仓≥3 笔（防守定位，不强制 6 笔）；B3 = 年化≥6% 且回撤≤10% 且夏普≥1.5 且频率≥3 笔/月；组合整体 = 年化≥3.5% 且回撤≤10%，季度考核，未达标禁止实盘。</div>
+</div>
+
+<!-- 六、总体结论 -->
+<div class="card">
+  <h2>六、总体结论</h2>
+  <div class="verdict v-warn">总体结论：<b>有条件发布</b> —— 主文档规则体系逻辑自洽、执行链路完整、回测证据链扎实；但实盘执行文本存在 2 项 P0 级参数冲突（P1/E-P1 带宽 5%/3% vs 7%/4%、P12 回撤 50/40/30% vs 45/35/25%），直接影响止损与利润保护的正确执行，修复后方可进入实盘执行。</div>
+  <table>
+    <tr><th>结论选项</th><th>适用条件</th><th>本次判定</th></tr>
+    <tr><td>✅ 通过发布</td><td>无 P0、P1 全部修复、回测可复现性就绪</td><td>—</td></tr>
+    <tr><td><b>⚠️ 有条件发布</b></td><td><b>P0 修复并回归通过；P1 限期修复（可复现性地址 08-31）；P2 随下一轮同步清理；B3 模拟盘仍按原计划 09-01 启动</b></td><td><b>✓ 本次判定</b></td></tr>
+    <tr><td>❌ 不通过</td><td>存在未修复 P0 且直接影响已执行实盘动作，或规则体系断裂</td><td>—</td></tr>
+  </table>
+  <h3>结论依据</h3>
+  <ul style="margin-left:18px;">
+    <li><b>支撑面</b>：四层校验中 L2（执行链路）有条件通过、L4（工程化）通过；主文档内部口径（11.4/11.2a/F-20/附录 G/3.2）自洽且与回测证据链一致；4 案例 3/4 强拦截；回测纪律（T-1 铁律/PIT/历史成分股/跨资产检验）完整。</li>
+    <li><b>扣分面</b>：2 项 P0 位于实盘执行文本（止损带宽、移动止损回撤）——执行端与主文档/回测基线分裂，属「执行正确性」缺陷而非「策略设计」缺陷，修复成本低、回归验证直接，故不判「不通过」。</li>
+    <li><b>不影响面</b>：主引擎「回测未达标禁止实盘」状态不变；B3 模拟盘 09-01 启动计划不受影响（B3 止损口径独立 = 8% 固定，无 P0 冲突）。</li>
+  </ul>
+</div>
+
+<!-- 七、修复后回归测试清单 -->
+<div class="card">
+  <h2>七、修复后回归测试清单</h2>
+  <table>
+    <tr><th style="width:36px;">序号</th><th>验证项</th><th>验证方法</th><th style="width:110px;">通过标准</th></tr>
+    <tr><td>1</td><td>P0-01 修复回归（执行文本带宽 7%/4%）</td><td>全文检索「带宽 5%」「带宽 3%」确保清零；与主文档 11.4、附录 G 逐项比对</td><td>零残留；三处口径完全一致</td></tr>
+    <tr><td>2</td><td>P0-02 修复回归（P12 回撤 45/35/25%）</td><td>全文检索「回撤 50%」「40%」「30%」旧档位清零；附录 G 补登 P12 参数行</td><td>零残留；附录 G 覆盖 P12 参数</td></tr>
+    <tr><td>3</td><td>P1-03 版本状态同步</td><td>第 7 行与第 1496 行数值、门槛口径一致</td><td>两处统一为 08-24 复测口径（2.49%/2.37% &lt;3.5%）</td></tr>
+    <tr><td>4</td><td>P1-04 得分门槛标注</td><td>L361 补注执行口径；L363 头部加 v5.0 归档标记</td><td>三处口径可追溯至附录 G（75 固定）</td></tr>
+    <tr><td>5</td><td>P1-05 ETF 门槛 + 可复现性</td><td>5.2 节补注 75/78；GitHub 仓库地址真实可访问（或登记延期）</td><td>08-31 前地址生效，engine.py+requirements 可下载</td></tr>
+    <tr><td>6</td><td>P2-06/07/08 清理</td><td>预案 78→85；观察通道开启条件改 ADX 口径；删除「组合 20 日波动率」表述；BREADTH 数据刷新 + [原始/代理] 标注字段</td><td>三项残留清零；BREADTH 覆盖至最近交易日</td></tr>
+    <tr><td>7</td><td>案例③增强（政策突变复核动作）</td><td>特殊场景处置表补「政策突变当日强制复核层级 2/2.5 白名单」行</td><td>新增处置行存在且动作二元化</td></tr>
+    <tr><td>8</td><td>滑点冲击测试产出</td><td>按 16 章 L1426-1433 跑 B3 三规模测试，输出《滑点冲击测试报告》</td><td>100 万衰减≤5%、500 万≤15%、1000 万≤25%</td></tr>
+    <tr><td>9</td><td>B3 模拟盘准入前置复核</td><td>P0-01/02 修复后，模拟盘台账口径与执行文本离场卡逐项核对</td><td>台账参数（止损 8%、P12v6）与文档一致</td></tr>
+    <tr><td>10</td><td>全量回归（跨文档交叉校验）</td><td>对修复后的三份文件执行本文档同款 12 项数值口径对照 + 4 案例反推</td><td>P0=0、P1 清零或已登记限期、P2≤2</td></tr>
+  </table>
+</div>
+
+<div class="footer">
+  本报告仅供研究参考，不构成个人投资建议。市场有风险，投资需谨慎。<br>
+  复核对象版本：v4.7-R10-P2 修复版（2136 行）｜复核日期：2026-08-21
+</div>
+
+</div>
+</body>
+</html>

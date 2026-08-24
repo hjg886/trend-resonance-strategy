@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>中线趋势共振策略 v5.0 全量复核报告</title>
+<style>
+  :root{
+    --bg:#f7f8fa; --card:#ffffff; --ink:#1f2329; --muted:#5b636e;
+    --line:#e3e7ee; --brand:#1f5fd6; --red:#c0392b; --orange:#d98324;
+    --green:#1e8e5a; --p0:#c0392b; --p1:#d98324; --p2:#b38600; --p3:#5b636e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Microsoft YaHei","PingFang SC",-apple-system,Segoe UI,sans-serif;line-height:1.65;font-size:14px}
+  .wrap{max-width:1100px;margin:0 auto;padding:28px 22px 60px}
+  header{border-bottom:3px solid var(--brand);padding-bottom:14px;margin-bottom:18px}
+  h1{font-size:23px;margin:0 0 6px}
+  h2{font-size:18px;margin:30px 0 12px;padding-left:10px;border-left:4px solid var(--brand)}
+  h3{font-size:15px;margin:18px 0 8px;color:var(--brand)}
+  .meta{display:grid;grid-template-columns:repeat(2,1fr);gap:6px 24px;font-size:13px;color:var(--muted)}
+  .meta b{color:var(--ink)}
+  table{width:100%;border-collapse:collapse;margin:10px 0 6px;background:var(--card);font-size:12.5px}
+  th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+  th{background:#eef2f8;font-weight:600;color:#23314a}
+  tr:nth-child(even) td{background:#fafbfc}
+  .pill{display:inline-block;padding:1px 9px;border-radius:11px;font-size:11.5px;font-weight:700;color:#fff}
+  .p0{background:var(--p0)} .p1{background:var(--p1)} .p2{background:var(--p2)} .p3{background:var(--p3)}
+  .ok{color:var(--green);font-weight:700} .no{color:var(--red);font-weight:700} .warn{color:var(--orange);font-weight:700}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin:10px 0}
+  .verdict{border:2px solid var(--red);background:#fff5f4;border-radius:8px;padding:16px 18px;margin:14px 0}
+  .verdict b{color:var(--red)}
+  .layer{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 4px}
+  .layer .box{flex:1;min-width:200px;border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--card)}
+  .layer .box .t{font-weight:700;margin-bottom:4px}
+  code{background:#eef2f8;padding:1px 5px;border-radius:4px;font-size:12px;color:#23314a}
+  .note{font-size:12px;color:var(--muted);margin:4px 0}
+  ul{margin:6px 0 6px 18px;padding:0}
+  li{margin:3px 0}
+  .foot{margin-top:34px;border-top:1px solid var(--line);padding-top:12px;font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>中线趋势共振策略 v5.0 — 全量复核报告</h1>
+  <div class="meta">
+    <div><b>被复核文档</b>：中线趋势共振策略_v5.0.txt（A股为主·ETF为辐·开放式漏斗版）</div>
+    <div><b>版本号</b>：v5.0（2026-08-24 14:31 定稿）</div>
+    <div><b>复核人</b>：WorkBuddy 主代理 + 三层并行审计子代理</div>
+    <div><b>复核时间</b>：2026-08-24 15:20（GMT+8）</div>
+    <div><b>复核依据</b>：v5.0 主文档 + 实盘执行文本 + 引擎/回测代码 + output/ 回测产物</div>
+    <div><b>配套文件</b>：实盘执行文本.txt / 观察通道开放预案.txt / run_backtest.py / engine.py / metrics.json</div>
+  </div>
+</header>
+
+<!-- 分层结论 -->
+<h2>一、分层结论</h2>
+<div class="layer">
+  <div class="box"><div class="t">第一层 · 文本逻辑基础校验</div><span class="pill p0">不通过</span><div class="note">跨文档门槛(3.5% vs 6%)与基线(2.49/2.37 vs 2.97/4.02)双标，主文档内部 R 值线/观察池门槛自相矛盾。</div></div>
+  <div class="box"><div class="t">第二层 · 执行链路闭环校验</div><span class="pill p1">不通过</span><div class="note">核心固化裁决(R-04/R-05/R-06/STOCK_QUOTA)代码默认关闭、依赖 env 静默生效；审计字段缺失。</div></div>
+  <div class="box"><div class="t">第三层 · 实盘反向映射+回测</div><span class="pill p1">不通过</span><div class="note">4案例可刚性拦截/合理降级；但回测不可复现(env无清单/指标异常)、主引擎OOS未过门槛(设计性禁止)。</div></div>
+  <div class="box"><div class="t">第四层 · 工程化质量校验</div><span class="pill p1">待优化</span><div class="note">参数部分集中(env可读)但默认关闭即失效；得分门槛 env 静默被硬编码覆盖；版本/灰度机制齐备。</div></div>
+</div>
+<div class="note">注：第三层"主引擎 OOS 未过门槛"为<b>设计性禁止</b>（v5.0 裁决主引擎禁实盘、B3 进攻线 OOS 13.15% 为唯一正期望源），非文档缺陷；文档可发布性的阻断项来自 P0-01~P0-04 的一致性与执行落地缺口。</div>
+
+<!-- 总体结论 -->
+<h2>二、总体结论</h2>
+<div class="verdict">
+  <b>③ 不通过（存在 P0 问题，禁止发布）</b><br>
+  阻断级问题清单：P0-01（跨文档年化门槛 3.5% vs 6%）、P0-02（跨文档主引擎基线 2.49/2.37 vs 2.97/4.02）、P0-03（核心固化裁决代码默认关闭、可静默绕过/不可复现）、P0-04（STOCK_QUOTA=3 依赖默认关闭的 STOCKCHANNEL_V5，v5.0 #167 个股通道可静默失效）。<br>
+  上述任一 P0 未修复前，按"修复即通过"无效——必须修复后执行对应回归测试（见第六节）。
+</div>
+
+<!-- 问题清单 -->
+<h2>三、问题清单（P0–P3 分级）</h2>
+
+<h3>P0 · 阻断级（必须修复否则禁止发布）</h3>
+<table>
+  <tr><th style="width:64px">编号</th><th style="width:54px">级别</th><th style="width:210px">所在章节/条款（文件:行号）</th><th>问题描述</th><th>修复建议</th></tr>
+  <tr>
+    <td>P0-01</td><td><span class="pill p0">P0</span></td>
+    <td>主文档 L7/L1465/L1472/L1514；实盘执行文本 L6/L24/L385/L399</td>
+    <td>年化门槛双标：主文档已声明"6% 因数学不可能于 08-24 废除、改 3.5%"，实盘执行文本（实际执行文件）仍用<b>已废除的 6%</b> 作禁止实盘硬门槛。按执行文本实盘将"永久禁止"，与主文档"达 3.5% 即可"对立。</td>
+    <td>实盘执行文本 L6/L24/L385/L399 全部 <code>6%</code>→<code>3.5%</code>，版本状态句对齐主文档 L1517。</td>
+  </tr>
+  <tr>
+    <td>P0-02</td><td><span class="pill p0">P0</span></td>
+    <td>主文档 L7/L1498/L1517/L1857；实盘执行文本 L6/L24</td>
+    <td>主引擎基线双标：执行文本仍为 <b>IS 2.97%/OOS 4.02%</b>（08-24 复测前旧值），主文档已更新为 <b>IS 2.49%/OOS 2.37%</b>（数据补齐53只后复测，08-24）。同源基线两时点数值，执行文本未同步。</td>
+    <td>实盘执行文本统一为 <code>IS 2.49% / OOS 2.37%（2026-08-24 复测口径）</code>。</td>
+  </tr>
+  <tr>
+    <td>P0-03</td><td><span class="pill p0">P0</span></td>
+    <td>run_backtest.py L129/L167/L172/L174</td>
+    <td>核心固化裁决在代码中<b>默认关闭</b>：<code>STOCKCHANNEL_V5</code>(L129)、<code>VOLGATE</code>(R-04, L167)、<code>S1CONFIRM</code>(R-05, L172)、<code>EP1TENOR</code>(R-06, L174) 默认均为 <code>"0"</code>。文档称"已加载/已固化"，运行时却静默不生效；且无 run-manifest 记录实际 env，<b>可被直接绕过且不可复现</b>。</td>
+    <td>①确需默认生效的开关改为默认开启或写入不可覆盖配置文件；②每次回测/实盘提交 run-manifest 记录全部 env；③缺失关键 env 时引擎应报错/告警而非静默回退旧行为。</td>
+  </tr>
+  <tr>
+    <td>P0-04</td><td><span class="pill p0">P0</span></td>
+    <td>run_backtest.py L133/L590/L707</td>
+    <td><code>STOCK_QUOTA=3</code>（v5.0 #167 个股通道打通核心）仅在 <code>STOCKCHANNEL_V5 and STOCK_QUOTA>0</code> 时生效，而该开关默认关闭。若运行未显式 <code>BT_STOCKCHANNEL_V5=1</code>，#167「个股通道打通」整体静默失效、回退六年0笔旧行为，<b>无任何报错/日志</b>。</td>
+    <td>随 P0-03 一并固化：STOCKCHANNEL_V5 默认开启或写入配置文件；关闭即显式告警。</td>
+  </tr>
+</table>
+
+<h3>P1 · 严重级（必须修复，可带条件发布）</h3>
+<table>
+  <tr><th style="width:64px">编号</th><th style="width:54px">级别</th><th style="width:200px">所在章节/条款</th><th>问题描述</th><th>修复建议</th></tr>
+  <tr><td>P1-01</td><td><span class="pill p1">P1</span></td><td>执行文本 L24；engine.py L84-85；run_backtest.py L204-205</td><td>R-06 止损带宽双标：执行文本写"<b>≤11日7%/＞11日4%</b>"，但代码默认 <code>ep1_band_short=5.0 / ep1_band_long=3.0</code>（5%/3%），回测产物按 5%/3% 生成。<b>实盘将运行 7%/4% 且未经回测验证</b>——隐性绕过校验。</td><td>统一为单一数值（建议以回测验证通过的为准并在文档/代码双向标注），代码默认值与文档一致；若靠 env 覆盖须记入 run-manifest。</td></tr>
+  <tr><td>P1-02</td><td><span class="pill p1">P1</span></td><td>output/metrics.json；主文档 L7</td><td>回测不可复现 / 指标异常：metrics.json 主引擎 OOS 最大回撤 <b>113.97%</b>（与总收益 +0.71% 物理矛盾）、无 run-manifest 记录 env、产物 OOS 0.46% 与主文档 2.37% 不一致。回测结论可信度受损。</td><td>修正 metrics 计算口径（核对权益/回撤公式）；补 run-manifest；统一数值来源至 08-24 复测口径。</td></tr>
+  <tr><td>P1-03</td><td><span class="pill p1">P1</span></td><td>engine.py L53；metrics.py L53</td><td>滑点与冲击成本测试缺失：仅固定成本 0.1%买/0.2%卖，<b>无规模相关滑点/冲击模型</b>；回测固定 100 万单规模，未对 500万/1000万 建模。无法确认大资金下收益衰减。</td><td>补充多规模（100/500/1000万）滑点冲击测试，报告实际收益衰减曲线。</td></tr>
+  <tr><td>P1-04</td><td><span class="pill p1">P1</span></td><td>journal_template.csv；拦截计数代码</td><td>日志留痕不足：拦截仅聚合计数，台账缺 <code>gate_a / tre / breadth / s1_confirm</code> 等审计列，<b>无法逐笔审计规则是否实际执行</b>。</td><td>日志模板补审计字段，每笔建仓/拦截记录触发的关卡与判定值。</td></tr>
+  <tr><td>P1-05</td><td><span class="pill p1">P1</span></td><td>执行文本 L385/L399；主文档 L1468/L1471</td><td>跨文档硬性门槛项数矛盾：执行文本列 R-04~R-09 全为硬性门槛，主文档已将 R-05 胜率、R-08 频率<b>降级为观察/补充项</b>，仅 4 项（R-04、R-06×2、R-09）维持硬性。</td><td>执行文本改为"4 项硬性门槛 + R-05 胜率/R-08 频率为观察项，组合整体年化≥3.5%"。</td></tr>
+  <tr><td>P1-06</td><td><span class="pill p1">P1</span></td><td>主文档 L468（MIN③）/L119/L341（六灯/哲学）</td><td>R 值否决线自相矛盾：MIN③ 在 <code>R>25%</code> 即输出 0%（当日暂停建仓=实质否决），与"仅 >0.35 否决、0.25-0.35 交 MIN③ 降权"哲学及六灯第4灯 35% 门槛冲突；R∈(25%,35%] 被 MIN 否决，使"降权不否决"落空。</td><td>MIN③ 改为 <code>R>35%→0%</code> 与哲学对齐；或显式注明"此处 25% 为仓位缩放硬截断、与六灯 35% 为两套独立约束"。</td></tr>
+  <tr><td>P1-07</td><td><span class="pill p1">P1</span></td><td>主文档 L1933/L382/L385</td><td>个股观察池入门门槛三冲突：L1933 写 70、L382 写 75、L385 写 80，与 #167「反对高门槛卡死」精神相悖，动摇个股通道打通口径。</td><td>明确分层：观察池常规入门 ≥75（P0dCore）→ S3/观察通道资格 ≥70（#167）；L385"常规≥80"订正为 ≥75。</td></tr>
+  <tr><td>P1-08</td><td><span class="pill p1">P1</span></td><td>主文档 L917-923</td><td>手动绕过申报通道构成"可被直接绕过"：锁死（F-18/层级缺失/全局）仅阻断 AI 输出指令，<b>不阻断人经券商系统手动下单</b>；仅需"当日收盘前申报"，缺严格审批层级 + 事后审计留痕，违反豁免三要素。</td><td>补三要素（①明确触发条件 ②明确审批层级 ③事后审计留痕+定期复核）；或删除裸豁免，锁死即禁止任何渠道下单。</td></tr>
+</table>
+
+<h3>P2 · 一般级（限期优化，不阻断发布）</h3>
+<table>
+  <tr><th style="width:64px">编号</th><th style="width:54px">级别</th><th style="width:190px">所在章节/条款</th><th>问题描述</th><th>修复建议</th></tr>
+  <tr><td>P2-01</td><td><span class="pill p2">P2</span></td><td>观察通道开放预案 L27；主文档 L237；执行文本 L188/L250</td><td>备查预案观察通道试探仓门槛写 <b>≥80</b>（并叙"≥78笔误已更正"），与主文档/执行文本 <b>≥70</b> 冲突。预案已声明以主文档为准，属滞后。</td><td>预案 L27 改 ≥70，删除"≥78笔误"旧叙述，加注"以主文档 3.2 总控 ≥70 为准"。</td></tr>
+  <tr><td>P2-02</td><td><span class="pill p2">P2</span></td><td>执行文本 L24；主文档 L1468</td><td>R-05 表述易误读：执行文本称"R-05 已加载（确认制）"，主文档称"R-05 胜率已从硬性门槛移除、降级为观察项"。已确认指不同对象不矛盾，但措辞宜统一防误读。</td><td>统一措辞：区分"R-05 确认制规则仍运行"与"R-05 胜率指标已降级观察"，避免混用。</td></tr>
+  <tr><td>P2-03</td><td><span class="pill p2">P2</span></td><td>run_backtest.py L177/L123-125</td><td>得分门槛 env 静默失效：<code>R10_GATES_ON</code> 默认开时实际门槛硬编码 75/73/78，<code>BT_SCORE_GATE</code> 等环境变量在默认配置下不生效，违反"参数集中管理"。</td><td>得分门槛统一由 env 读取，移除硬编码覆盖或显式注释优先级。</td></tr>
+</table>
+
+<h3>P3 · 建议级（记录待办，择机优化）</h3>
+<table>
+  <tr><th style="width:64px">编号</th><th style="width:54px">级别</th><th style="width:190px">所在章节/条款</th><th>问题描述</th><th>修复建议</th></tr>
+  <tr><td>P3-01</td><td><span class="pill p3">P3</span></td><td>执行文本 L8；主文档 L1502/L1463</td><td>主引擎配置比例口径漂移：执行文本 10-20%，主文档 10-15%/当前15%。</td><td>统一为"当前 15%、台阶推进至 10-30%"。</td></tr>
+  <tr><td>P3-02</td><td><span class="pill p3">P3</span></td><td>回测 output/ 敏感性报告</td><td>参数敏感性 ±10% 报告缺失（核心参数 EP1_PCT/vol20阈值/P12门槛无统一扰动存档），无法判定过拟合稳健性。</td><td>补核心参数 ±10% 敏感性报告。</td></tr>
+  <tr><td>P3-03</td><td><span class="pill p3">P3</span></td><td>scan_env_daily.py / MHD</td><td>MHD/BREADTH 数据刷新止于 06-30，刷新前缺失默认 30 中性。</td><td>排期刷新市场健康度数据。</td></tr>
+  <tr><td>P3-04</td><td><span class="pill p3">P3</span></td><td>主文档 L760（GitHub 占位符）</td><td>回测仓库地址占位符未填。</td><td>2026-08-31 前填充 org/repo，否则回测结论降级为"内部不可复现"。</td></tr>
+  <tr><td>P3-05</td><td><span class="pill p3">P3</span></td><td>主文档附录序列</td><td>"v5.0 已删除附录B/B2"未见显式声明出处（所提供三文档无该声明，附录序列为 A→C→D→E→F→G 跳过 B，处置一致）。</td><td>在变更记录或附录 E 显式注明"附录 B/B2 已于 v5.0 删除"，消除溯源歧义。</td></tr>
+</table>
+
+<!-- 案例测试结果 -->
+<h2>四、第三层 · 案例测试结果表</h2>
+<table>
+  <tr><th style="width:40px">编号</th><th style="width:110px">案例类型</th><th style="width:120px">预期行为</th><th style="width:130px">实际行为（v5.0）</th><th style="width:140px">介入节点</th><th style="width:150px">判定依据条款</th><th style="width:90px">是否符合预期</th></tr>
+  <tr>
+    <td>①</td><td>高位追涨</td><td>应拦截追涨</td><td><b>拦截</b><br>（603259 类：连续涨停→vol20≈28%≥20；开盘涨幅 6.2%&gt;1%）</td><td>R-04 闸门B + R-05 + 六灯第3灯</td><td><code>R-04</code>(L130-131) vol20≥20 禁 S1/S2 常规；<code>R-05</code>(L161) 开盘≤1%；六灯第3灯竞价≤2%/1%</td>
+    <td class="ok">符合</td>
+  </tr>
+  <tr>
+    <td>②</td><td>低位震荡假突破</td><td>应拦截/限仓</td><td><b>拦截</b>（vol20&lt;15 闸门A）或放行后 P1 止损<br>（600276 类：横盘 vol20≈13%&lt;15）</td><td>R-04 闸门A / S3 有限建仓(3.3) / P1-E-P1</td><td><code>R-04 闸门A</code>(L130/L272) vol20&lt;15 禁一切新建仓；S3 需 Top3+≥70；假突破回落触发 <code>P1/E-P1</code>(L659/687)</td>
+    <td class="ok">符合</td>
+  </tr>
+  <tr>
+    <td>③</td><td>政策突变</td><td>应降权+出口兜底</td><td><b>放行(降权)</b>，出口风控兜底；<b>存在隔夜跳空盲点</b></td><td>层级1 不触发 → 政策赛道降权（非否决）；破位后 P4/P1 离场</td><td>"真风险层"仅=层级1财报暴雷/ETF产品否决 E-P0.0/持仓 P2-P3(L21/L95)；政策赛道已降为加权排序</td>
+    <td class="warn">部分符合/有保留</td>
+  </tr>
+  <tr>
+    <td>④</td><td>极端行情（指数单日暴跌&gt;5%）</td><td>应暂停+降档</td><td><b>暂停建仓+降档/减仓</b><br>（沪深300 单日 -6.2% → meltdown III）</td><td>三级熔断 + S4 冻结 + 账户级 P9/P8</td><td>熔断 III 级：沪深300 T-1 跌幅≤-5%(engine L370)；vol20≥25%→<code>S4 冻结</code>+<code>R-04 闸门B</code>；<code>P9/E-P10</code> 连3日破MA60→总仓≤20%；<code>P8</code> 月度浮亏12%→≤40%</td>
+    <td class="ok">符合</td>
+  </tr>
+</table>
+<div class="note">案例③保留项：v5.0 #167「反对高门槛卡死」将政策由一票否决降为降权，符合修改意图；但政策黑天鹅无入口硬否决、仅次日开盘 P1 止损，<b>无法规避政策致隔夜跌停跳空</b>——属放宽后的风险敞口，建议在出口层补"重大政策利空盘前人工复核"机制（关联 P1-08 审批层级）。</div>
+
+<!-- 回测验证表 -->
+<h2>五、第三层 · 回测验证表（含可复现性缺口）</h2>
+<table>
+  <tr><th style="width:170px">指标</th><th style="width:120px">实验组数值</th><th style="width:110px">对照组数值</th><th style="width:80px">阈值</th><th style="width:60px">IS/OOS</th><th style="width:90px">达标判定</th></tr>
+  <tr><td>主引擎 年化收益</td><td>2.26%（产物）/2.49%（主文档）</td><td>沪深300 IS 4.99%</td><td>≥3.5%</td><td>IS</td><td class="no">不达标</td></tr>
+  <tr><td>主引擎 年化收益</td><td>0.46%（产物）/2.37%（主文档）</td><td>沪深300 OOS 21.73%</td><td>≥3.5%</td><td>OOS</td><td class="no">不达标*</td></tr>
+  <tr><td>基准超额（OOS）</td><td>超额 -21.27%（产物）</td><td>—</td><td>显著为正</td><td>OOS</td><td class="no">不达标</td></tr>
+  <tr><td>最大回撤</td><td>IS 46.88% / OOS 113.97%（产物，异常）</td><td>—</td><td>未明示</td><td>IS/OOS</td><td class="warn">指标异常</td></tr>
+  <tr><td>夏普比率</td><td>4.59 / 0.52（产物）</td><td>—</td><td>未明示</td><td>IS/OOS</td><td class="ok">辅助</td></tr>
+  <tr><td>卡玛比率</td><td>4.82 / 0.40（产物，受 DD 异常拖累）</td><td>—</td><td>未明示</td><td>IS/OOS</td><td class="warn">辅助/异常</td></tr>
+  <tr><td>胜率（OOS）</td><td>0.0%（产物，仅2笔全亏）</td><td>—</td><td>—</td><td>OOS</td><td class="warn">待优化</td></tr>
+  <tr><td>B3 进攻线 年化（OOS）</td><td>13.15%（已复核 final_equity 1,203,590/100万/18月）</td><td>沪深300 OOS 21.73%</td><td>≥6%</td><td>OOS</td><td class="ok">达标△</td></tr>
+  <tr><td>滑点/冲击成本（100/500/1000万）</td><td>缺失（仅固定 0.1%/0.2%，无规模模型）</td><td>—</td><td>多规模建模</td><td>—</td><td class="no">未实现(P1-03)</td></tr>
+  <tr><td>参数敏感性（±10%）</td><td>缺失（仅结构/开关级对照，无核心参数扰动）</td><td>—</td><td>±10% 稳健</td><td>—</td><td class="warn">未闭环(P3-02)</td></tr>
+  <tr><td>可复现性</td><td>缺 run-manifest（env 无记录）；产物 OOS 0.46% vs 主文档 2.37%</td><td>—</td><td>可复现</td><td>—</td><td class="no">缺陷(P1-02)</td></tr>
+</table>
+<div class="note">* 主引擎 OOS 未过门槛为<b>设计性禁止</b>（v5.0 裁决主引擎禁实盘，B3 为唯一正期望源），非文档缺陷。△ B3 13.15% 达标但状态为<b>模拟盘（2026-09-01 起 ≥6月验证）</b>，不可作为实盘收益来源。核心指标不达标项均为"设计性禁止"或"数据/复现缺陷"，无新增策略逻辑错误。</div>
+
+<!-- 修复后回归测试 -->
+<h2>六、修复后回归测试指引（禁止"修复即通过"）</h2>
+<div class="card">
+  <ul>
+    <li><b>修复 P0-01/P0-02（门槛/基线同步）</b> → 重跑<b>第一层</b>数值一致性校验 + 重跑<b>回测验证表</b>确认口径统一。</li>
+    <li><b>修复 P0-03/P0-04（核心裁决默认关闭 / STOCK_QUOTA 静默失效）</b> → 重跑<b>第三层全部 4 案例</b>（重点③政策突变、④极端行情）+ 补 run-manifest 后<b>重跑回测</b>确认默认配置即生效。</li>
+    <li><b>修复 P1-01（R-06 带宽双标）</b> → 用<b>实盘将运行的带宽</b>重跑回测 + 重跑第三层案例③，确认参数已验证。</li>
+    <li><b>修复 P1-02（回测不可复现/指标异常）</b> → 修正 metrics 后<b>全量重跑回测</b>并产出 run-manifest，复核 IS/OOS/回撤一致性。</li>
+    <li><b>修复 P1-04（日志审计字段）</b> → 重跑<b>第二层</b>审计字段核验，确认每笔可逐笔溯源。</li>
+    <li><b>修复 P1-05/P1-06/P1-07（门槛项数/R值线/观察池门槛）</b> → 重跑<b>第一层</b>对应章节一致性校验。</li>
+    <li><b>修复 P1-08（手动绕过豁免三要素）</b> → 重跑<b>第二层</b>豁免三要素核验。</li>
+    <li><b>修复 P2-03（得分门槛 env）</b> → 重跑<b>第四层</b>参数集中管理核验。</li>
+  </ul>
+</div>
+
+<div class="foot">
+  复核依据文档：中线趋势共振策略_v5.0.txt（1961 行）｜中线趋势共振策略 v5.0 实盘执行文本.txt（443 行）｜观察通道开放预案.txt｜run_backtest.py / engine.py / metrics.py / scan_env_daily.py / refresh_sim_data.py / scan_b3_daily.py / run_attack_b.py｜output/metrics.json、attack_b_B3_OOS.json、mhd_scores.csv。<br>
+  核心精神校验结论：v5.0「反对无意义高门槛卡死、提收益基础上科学控风险」在<b>规则设计层面成立</b>（案例①③④合理拦截/降级、个股通道 R 值去硬否决）；但在<b>工程落地与文档一致性层面存在 P0 阻断项</b>，须先修复 P0-01~P0-04 并回归测试方可发布。<br>
+  本报告仅供研究参考，不构成个人投资建议。
+</div>
+</div>
+</body>
+</html>

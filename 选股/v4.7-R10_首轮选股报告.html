@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>v4.7-R10 首轮选股报告 | 观察池筛选结果</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, "Microsoft YaHei", sans-serif; background: #f5f5f0; color: #2c2c2a; line-height: 1.6; font-size: 14px; }
+.container { max-width: 960px; margin: 0 auto; padding: 24px 20px 60px; }
+h1 { font-size: 22px; font-weight: 600; color: #1a1a1a; margin-bottom: 4px; }
+h2 { font-size: 17px; font-weight: 600; color: #1a1a1a; margin: 28px 0 12px; padding-bottom: 8px; border-bottom: 2px solid #d4d0c4; }
+h3 { font-size: 15px; font-weight: 500; color: #444; margin: 18px 0 8px; }
+.subtitle { color: #888; font-size: 13px; margin-bottom: 20px; }
+.card { background: #fff; border: 1px solid #e0ddd5; border-radius: 8px; padding: 16px 20px; margin-bottom: 16px; }
+.summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+.metric { background: #fff; border: 1px solid #e0ddd5; border-radius: 8px; padding: 14px 16px; text-align: center; }
+.metric .num { font-size: 24px; font-weight: 600; color: #1a1a1a; }
+.metric .num.red { color: #c0392b; }
+.metric .num.green { color: #27ae60; }
+.metric .num.amber { color: #e67e22; }
+.metric .label { font-size: 12px; color: #888; margin-top: 4px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { background: #f8f7f4; padding: 10px 8px; text-align: left; font-weight: 600; color: #444; border-bottom: 2px solid #d4d0c4; font-size: 12px; }
+td { padding: 8px; border-bottom: 1px solid #eee; }
+tr:hover td { background: #fafaf7; }
+.grade-B { color: #2980b9; font-weight: 600; }
+.grade-C { color: #e67e22; font-weight: 600; }
+.tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+.tag-m1 { background: #e8f0fe; color: #1a5276; }
+.tag-m2 { background: #fef3e8; color: #935116; }
+.tag-exempt { background: #eafaf1; color: #1e8449; }
+.tag-vol-ok { background: #eafaf1; color: #1e8449; }
+.tag-vol-warn { background: #fef3e8; color: #935116; }
+.tag-vol-block { background: #fdedec; color: #922b21; }
+.chart-box { background: #fff; border: 1px solid #e0ddd5; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+.chart { width: 100%; height: 280px; }
+.note { background: #fef9e7; border: 1px solid #f9e79f; border-radius: 6px; padding: 12px 16px; font-size: 13px; color: #7d6608; margin-bottom: 12px; }
+.warn { background: #fdedec; border: 1px solid #f5b7b1; border-radius: 6px; padding: 12px 16px; font-size: 13px; color: #922b21; margin-bottom: 12px; }
+.disclaimer { margin-top: 32px; padding: 16px; background: #f8f7f4; border-radius: 8px; font-size: 12px; color: #888; text-align: center; }
+.scroll-x { overflow-x: auto; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>v4.7-R10 首轮选股报告</h1>
+<p class="subtitle">观察池筛选 | 2026-08-18 | 中线趋势共振策略 v4.7-R10 回测驱动重构版</p>
+
+<div class="note">
+<b>两项关键裁决（2026-08-18）：</b><br>
+① <b>OCF 高增长豁免</b>——对"营收+净利双正（双增）"的标的，OCF/净利>0.5 门槛降至 OCF>0（仅排除负现金流）。研发驱动成长股在扩产备货期 OCF 天然偏弱，不等于账面利润造假。<br>
+② <b>流通市值上限取消</b>——原层级1硬过滤"50-500亿"系统性排除六大赛道龙头（中芯国际/北方华创/恒瑞/宁德时代等均>500亿）。与8.2市值均衡"大盘股>200亿"定义矛盾，取消上限仅保留下限≥50亿。补拉H档12只龙头数据后，通过数从10只增至24只，B级从1只增至10只。
+</div>
+
+<h2>一、筛选总览</h2>
+<div class="summary-grid">
+<div class="metric"><div class="num">84</div><div class="label">六赛道候选总数</div></div>
+<div class="metric"><div class="num green">24</div><div class="label">通过硬过滤（观察池）</div></div>
+<div class="metric"><div class="num red">58</div><div class="label">硬过滤淘汰</div></div>
+<div class="metric"><div class="num amber">2</div><div class="label">数据缺失</div></div>
+</div>
+
+<div class="card">
+<h3>失败过滤器命中统计（58只）</h3>
+<div id="chart_filter" class="chart"></div>
+</div>
+
+<h2>二、观察池（24只，Top 12 优先建仓候选）</h2>
+<p style="font-size:13px; color:#888; margin-bottom:12px;">按总评分降序排列。评级口径：A+≥90 / A≥80 / B≥70 / C&lt;70。B级可排序入池，C级仅监控不建仓。24只超过R-09观察池8-12只上限，取Top 12为优先监控/建仓候选，其余12只为扩展池。</p>
+
+<div class="scroll-x">
+<table>
+<thead>
+<tr>
+<th>#</th><th>代码</th><th>名称</th><th>赛道</th><th>主线</th><th>市值(亿)</th>
+<th>总评</th><th>级</th><th>基本面</th><th>趋势</th><th>情绪</th><th>微观</th><th>风控</th>
+<th>vol20</th><th>OCF豁免</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td><td>sh603259</td><td>药明康德</td><td>生物医药</td><td><span class="tag tag-m2">主线2</span></td>
+<td>4986</td><td class="grade-B">78.4</td><td class="grade-B">B</td>
+<td>74.2</td><td>85.4</td><td>77.4</td>
+<td>76.8</td><td>71.5</td>
+<td>55.3% <span class="tag tag-vol-warn">R-04仅S3/观察</span></td><td><span class="tag tag-exempt">是</span></td>
+</tr><tr>
+<td>2</td><td>sz300357</td><td>我武生物</td><td>生物医药</td><td><span class="tag tag-m2">主线2</span></td>
+<td>129</td><td class="grade-B">75.7</td><td class="grade-B">B</td>
+<td>79.2</td><td>77.0</td><td>67.3</td>
+<td>79.8</td><td>63.2</td>
+<td>45.0% <span class="tag tag-vol-warn">R-04仅S3/观察</span></td><td><span class="tag tag-exempt">是</span></td>
+</tr><tr>
+<td>3</td><td>sh605117</td><td>德业股份</td><td>储能/逆变器</td><td><span class="tag tag-m1">主线1</span></td>
+<td>879</td><td class="grade-B">75.7</td><td class="grade-B">B</td>
+<td>88.2</td><td>61.0</td><td>77.9</td>
+<td>81.2</td><td>75.2</td>
+<td>56.5% <span class="tag tag-vol-warn">R-04仅S3/观察</span></td><td><span class="tag tag-exempt">是</span></td>
+</tr><tr>
+<td>4</td><td>sh688120</td><td>华海清科</td><td>半导体设备</td><td><span class="tag tag-m1">主线1</span></td>
+<td>980</td><td class="grade-B">74.8</td><td class="grade-B">B</td>
+<td>77.2</td><td>81.8</td><td>54.7</td>
+<td>76.8</td><td>60.0</td>
+<td>69.8% <span class="tag tag-vol-warn">R-04仅S3/观察</span></td><td><span class="tag tag-exempt">是</span></td>
+</tr><tr>
+<td>5</td><td>sz002371</td><td>北方华创</td><td>半导体设备</td><td><span class="tag tag-m1">主线1</span></td>
+<td>5549</td><td class="grade-B">74.0</td><td class="grade-B">B</td>
+<td>78.5</td><td>79.8</td><td>58.2</td>
+<td>68.0</td><td>60.0</td>
+<td>61.9% <span class="tag tag-vol-warn">R-04仅S3/观察</span></td><td><span class="tag tag-exempt">是</span></td>
+</tr><tr>
+<td>6</td><td>sz300750</td><td>宁德时代</td><td>储能</td><td><span class="tag tag-m1">主线1</span></td>
+<td>18303</td><td class="grade-B">73.4</td><td class="grade-B">B</td>
+<td>82.8</td><td>64.6</td><td>79.4</td>
+<td>67.5</td><td>71.5</td>
+<td>33.8% <span class="tag tag-vol-warn">R-04仅S3/观察</span></td><td><span class="tag tag-exempt">是</span></td>
+</tr><tr>
+<td>7</td><td>sh600196</td><td>复星医药</td><td>生物医药</td><td><span class="tag tag-m2">主线2</span></td>
+<td>647</td><td class="grade-B">73.3</td><td class="grade-B">B</td>
+<td>73.3</td><td>79.8</td><td>55.5</td>
+<td>76.2</td><td>65.0</td>
+<td>27.4% <span class="tag tag-vol-warn">R-04仅S3/观察</span></td><td><span class="tag tag-exempt">是</span></td>
+</tr><tr>
+<td>8</td><td>sz002156</td><td>通富微电</td><td>半导体封测</td><td><span class="tag tag-m1">主线1</span></td>
+<td>1066</td><td class="grade-B">72.3</td><td class="grade-B">B</td>
+<td>83.9</td><td>62.4</td><td>80.2</td>
+<td>70.0</td><td>61.2</td>
+<td>107.1% <span class="tag tag-vol-warn">R-04仅S3/观察</span></td><td><span class="tag tag-exempt">是</span></td>
+</tr><tr>
+<td>9</td><td>sh688082</td><td>盛美上海</td><td>半导体设备</td><td><span class="tag tag-m1">主线1</span></td>
+<td>1597</td><td class="grade-B">71.8</td><td class="grade-B">B</td>
+<td>74.2</td><td>73.8</td><td>62.2</td>
+<td>76.8</td><td>60.8</td>
+<td>86.4% <span class="tag tag-vol-warn">R-04仅S3/观察</span></td><td><span class="tag tag-exempt">是</span></td>
+</tr><tr>
+<td>10</td><td>sz300661</td><td>圣邦股份</td><td>半导体设计</td><td><span class="tag tag-m1">主线1</span></td>
+<td>736</td><td class="grade-B">71.7</td><td class="grade-B">B</td>
+<td>84.0</td><td>59.6</td><td>76.8</td>
+<td>76.8</td><td>60.8</td>
+<td>72.9% <span class="tag tag-vol-warn">R-04仅S3/观察</span></td><td><span class="tag tag-exempt">是</span></td>
+</tr><tr>
+<td>11</td><td>sz300693</td><td>盛弘股份</td><td>储能/逆变器</td><td><span class="tag tag-m1">主线1</span></td>
+<td>139</td><td class="grade-C">69.6</td><td class="grade-C">C</td>
+<td>77.6</td><td>59.8</td><td>67.1</td>
+<td>77.5</td><td>70.8</td>
+<td>65.7% <span class="tag tag-vol-warn">R-04仅S3/观察</span></td><td><span class="tag tag-exempt">是</span></td>
+</tr><tr>
+<td>12</td><td>sh600276</td><td>恒瑞医药</td><td>生物医药</td><td><span class="tag tag-m2">主线2</span></td>
+<td>3488</td><td class="grade-C">69.5</td><td class="grade-C">C</td>
+<td>80.0</td><td>63.2</td><td>57.6</td>
+<td>75.5</td><td>60.8</td>
+<td>27.7% <span class="tag tag-vol-warn">R-04仅S3/观察</span></td><td><span class="tag tag-exempt">是</span></td>
+</tr><tr>
+<td>13</td><td>sh600584</td><td>长电科技</td><td>半导体封测</td><td><span class="tag tag-m1">主线1</span></td>
+<td>1526</td><td class="grade-C">67.9</td><td class="grade-C">C</td>
+<td>75.2</td><td>62.0</td><td>64.8</td>
+<td>70.0</td><td>64.2</td>
+<td>86.3% <span class="tag tag-vol-warn">R-04仅S3/观察</span></td><td><span style="color:#888">否</span></td>
+</tr><tr>
+<td>14</td><td>sh688239</td><td>航宇科技</td><td>航空航天</td><td><span class="tag tag-m1">主线1</span></td>
+<td>90</td><td class="grade-C">67.6</td><td class="grade-C">C</td>
+<td>87.0</td><td>52.0</td><td>56.1</td>
+<td>73.0</td><td>60.5</td>
+<td>44.4% <span class="tag tag-vol-warn">R-04仅S3/观察</span></td><td><span class="tag tag-exempt">是</span></td>
+</tr><tr>
+<td>15</td><td>sh603986</td><td>兆易创新</td><td>半导体设计</td><td><span class="tag tag-m1">主线1</span></td>
+<td>3057</td><td class="grade-C">67.3</td><td class="grade-C">C</td>
+<td>85.5</td><td>44.0</td><td>76.7</td>
+<td>70.0</td><td>72.8</td>
+<td>83.8% <span class="tag tag-vol-warn">R-04仅S3/观察</span></td><td><span class="tag tag-exempt">是</span></td>
+</tr><tr>
+<td>16</td><td>sh688008</td><td>澜起科技</td><td>半导体设计</td><td><span class="tag tag-m1">主线1</span></td>
+<td>2677</td><td class="grade-C">66.3</td><td class="grade-C">C</td>
+<td>81.0</td><td>46.6</td><td>73.3</td>
+<td>75.0</td><td>68.2</td>
+<td>70.4% <span class="tag tag-vol-warn">R-04仅S3/观察</span></td><td><span class="tag tag-exempt">是</span></td>
+</tr><tr>
+<td>17</td><td>sh603005</td><td>晶方科技</td><td>半导体封测</td><td><span class="tag tag-m1">主线1</span></td>
+<td>226</td><td class="grade-C">65.9</td><td class="grade-C">C</td>
+<td>75.5</td><td>52.0</td><td>71.9</td>
+<td>75.8</td><td>65.0</td>
+<td>55.1% <span class="tag tag-vol-warn">R-04仅S3/观察</span></td><td><span class="tag tag-exempt">是</span></td>
+</tr><tr>
+<td>18</td><td>sz002335</td><td>科华数据</td><td>储能/数据中心</td><td><span class="tag tag-m1">主线1</span></td>
+<td>166</td><td class="grade-C">64.8</td><td class="grade-C">C</td>
+<td>79.6</td><td>49.4</td><td>54.9</td>
+<td>81.2</td><td>60.5</td>
+<td>43.8% <span class="tag tag-vol-warn">R-04仅S3/观察</span></td><td><span class="tag tag-exempt">是</span></td>
+</tr><tr>
+<td>19</td><td>sz002472</td><td>双环传动</td><td>机器人</td><td><span class="tag tag-m1">主线1</span></td>
+<td>335</td><td class="grade-C">64.7</td><td class="grade-C">C</td>
+<td>71.9</td><td>57.0</td><td>56.6</td>
+<td>75.8</td><td>63.8</td>
+<td>39.3% <span class="tag tag-vol-warn">R-04仅S3/观察</span></td><td><span class="tag tag-exempt">是</span></td>
+</tr><tr>
+<td>20</td><td>sz002050</td><td>三花智控</td><td>机器人零部件</td><td><span class="tag tag-m1">主线1</span></td>
+<td>1648</td><td class="grade-C">63.0</td><td class="grade-C">C</td>
+<td>71.9</td><td>49.4</td><td>64.9</td>
+<td>76.8</td><td>63.8</td>
+<td>40.3% <span class="tag tag-vol-warn">R-04仅S3/观察</span></td><td><span class="tag tag-exempt">是</span></td>
+</tr><tr>
+<td>21</td><td>sz002111</td><td>威海广泰</td><td>低空经济</td><td><span class="tag tag-m1">主线1</span></td>
+<td>51</td><td class="grade-C">61.1</td><td class="grade-C">C</td>
+<td>71.2</td><td>62.0</td><td>44.5</td>
+<td>64.2</td><td>68.5</td>
+<td>18.2% <span class="tag tag-vol-ok">正常</span></td><td><span class="tag tag-exempt">是</span></td>
+</tr><tr>
+<td>22</td><td>sz000099</td><td>中信海直</td><td>低空经济</td><td><span class="tag tag-m1">主线1</span></td>
+<td>108</td><td class="grade-C">58.3</td><td class="grade-C">C</td>
+<td>71.9</td><td>44.6</td><td>39.2</td>
+<td>68.0</td><td>68.0</td>
+<td>26.6% <span class="tag tag-vol-warn">R-04仅S3/观察</span></td><td><span class="tag tag-exempt">是</span></td>
+</tr><tr>
+<td>23</td><td>sz002518</td><td>科士达</td><td>储能/逆变器</td><td><span class="tag tag-m1">主线1</span></td>
+<td>205</td><td class="grade-C">56.8</td><td class="grade-C">C</td>
+<td>85.0</td><td>45.4</td><td>75.9</td>
+<td>79.8</td><td>56.2</td>
+<td>47.2% <span class="tag tag-vol-warn">R-04仅S3/观察</span></td><td><span class="tag tag-exempt">是</span></td>
+</tr><tr>
+<td>24</td><td>sh688686</td><td>奥普特</td><td>机器人视觉</td><td><span class="tag tag-m1">主线1</span></td>
+<td>151</td><td class="grade-C">56.2</td><td class="grade-C">C</td>
+<td>79.2</td><td>53.4</td><td>71.9</td>
+<td>68.0</td><td>57.5</td>
+<td>68.5% <span class="tag tag-vol-warn">R-04仅S3/观察</span></td><td><span class="tag tag-exempt">是</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="card" style="margin-top:12px;">
+<h3>观察池关键指标明细</h3>
+<div class="scroll-x">
+<table>
+<thead>
+<tr>
+<th>代码</th><th>名称</th><th>净利YoY</th><th>营收YoY</th><th>ROE</th><th>毛利率</th>
+<th>OCF/净利</th><th>PE(2026E)</th><th>PB(2026E)</th><th>一致预期机构数</th>
+<th>MA60趋势</th><th>价/MA60</th><th>20日涨幅</th><th>60日涨幅</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>sh603259</td><td>药明康德</td>
+<td>13.2%</td><td>17.8%</td><td>25.83%</td>
+<td>52.3%</td><td>0.45</td>
+<td>5.26</td><td>8.32</td>
+<td>0</td>
+<td style="color:#27ae60">上升</td>
+<td>1.374</td>
+<td>32.2%</td><td>65.5%</td>
+</tr><tr>
+<td>sz300357</td><td>我武生物</td>
+<td>60.4%</td><td>10.7%</td><td>15.06%</td>
+<td>95.3%</td><td>0.13</td>
+<td>4.34</td><td>11.05</td>
+<td>0</td>
+<td style="color:#27ae60">上升</td>
+<td>1.063</td>
+<td>-1.4%</td><td>9.2%</td>
+</tr><tr>
+<td>sh605117</td><td>德业股份</td>
+<td>68.4%</td><td>73.8%</td><td>31.54%</td>
+<td>39.3%</td><td>0.50</td>
+<td>7.41</td><td>5.25</td>
+<td>0</td>
+<td style="color:#e74c3c">下降</td>
+<td>1.011</td>
+<td>18.9%</td><td>-18.3%</td>
+</tr><tr>
+<td>sh688120</td><td>华海清科</td>
+<td>5.9%</td><td>31.7%</td><td>14.22%</td>
+<td>41.1%</td><td>0.01</td>
+<td>15.42</td><td>23.03</td>
+<td>0</td>
+<td style="color:#27ae60">上升</td>
+<td>1.122</td>
+<td>1.3%</td><td>31.6%</td>
+</tr><tr>
+<td>sz002371</td><td>北方华创</td>
+<td>3.4%</td><td>25.8%</td><td>12.25%</td>
+<td>39.7%</td><td>0.13</td>
+<td>12.2</td><td>10.85</td>
+<td>0</td>
+<td style="color:#27ae60">上升</td>
+<td>1.054</td>
+<td>2.8%</td><td>9.8%</td>
+</tr><tr>
+<td>sz300750</td><td>宁德时代</td>
+<td>17.7%</td><td>23.1%</td><td>20.53%</td>
+<td>25.5%</td><td>0.71</td>
+<td>4.28</td><td>2.97</td>
+<td>0</td>
+<td style="color:#e74c3c">下降</td>
+<td>1.014</td>
+<td>3.9%</td><td>-1.5%</td>
+</tr><tr>
+<td>sh600196</td><td>复星医药</td>
+<td>13.9%</td><td>6.9%</td><td>5.46%</td>
+<td>50.5%</td><td>0.33</td>
+<td>1.23</td><td>1.52</td>
+<td>0</td>
+<td style="color:#27ae60">上升</td>
+<td>1.064</td>
+<td>3.9%</td><td>5.7%</td>
+</tr><tr>
+<td>sz002156</td><td>通富微电</td>
+<td>224.5%</td><td>22.8%</td><td>8.38%</td>
+<td>14.6%</td><td>0.65</td>
+<td>6.22</td><td>3.26</td>
+<td>0</td>
+<td style="color:#e74c3c">下降</td>
+<td>1.045</td>
+<td>1.4%</td><td>0.8%</td>
+</tr><tr>
+<td>sh688082</td><td>盛美上海</td>
+<td>21.0%</td><td>6.7%</td><td>11.56%</td>
+<td>46.5%</td><td>0.05</td>
+<td>9.94</td><td>18.26</td>
+<td>0</td>
+<td style="color:#e74c3c">下降</td>
+<td>1.037</td>
+<td>1.7%</td><td>32.1%</td>
+</tr><tr>
+<td>sz300661</td><td>圣邦股份</td>
+<td>107.0%</td><td>39.1%</td><td>11.11%</td>
+<td>51.5%</td><td>0.08</td>
+<td>13.53</td><td>16.11</td>
+<td>0</td>
+<td style="color:#e74c3c">下降</td>
+<td>1.019</td>
+<td>7.9%</td><td>0.1%</td>
+</tr><tr>
+<td>sz300693</td><td>盛弘股份</td>
+<td>14.6%</td><td>11.5%</td><td>24.23%</td>
+<td>39.3%</td><td>0.30</td>
+<td>5.36</td><td>3.26</td>
+<td>0</td>
+<td style="color:#e74c3c">下降</td>
+<td>1.041</td>
+<td>27.2%</td><td>-24.2%</td>
+</tr><tr>
+<td>sh600276</td><td>恒瑞医药</td>
+<td>21.8%</td><td>13.0%</td><td>12.66%</td>
+<td>86.5%</td><td>0.10</td>
+<td>4.97</td><td>9.81</td>
+<td>0</td>
+<td style="color:#27ae60">上升</td>
+<td>1.012</td>
+<td>-4.3%</td><td>6.7%</td>
+</tr><tr>
+<td>sh600584</td><td>长电科技</td>
+<td>42.7%</td><td>-1.8%</td><td>5.27%</td>
+<td>14.6%</td><td>1.08</td>
+<td>5.03</td><td>3.44</td>
+<td>0</td>
+<td style="color:#e74c3c">下降</td>
+<td>1.019</td>
+<td>0.7%</td><td>6.5%</td>
+</tr><tr>
+<td>sh688239</td><td>航宇科技</td>
+<td>31.6%</td><td>25.9%</td><td>9.58%</td>
+<td>28.4%</td><td>0.21</td>
+<td>3.96</td><td>3.55</td>
+<td>0</td>
+<td style="color:#e74c3c">下降</td>
+<td>0.917</td>
+<td>13.1%</td><td>-32.7%</td>
+</tr><tr>
+<td>sh603986</td><td>兆易创新</td>
+<td>522.8%</td><td>119.4%</td><td>11.27%</td>
+<td>46.8%</td><td>0.62</td>
+<td>9.8</td><td>13.73</td>
+<td>0</td>
+<td style="color:#e74c3c">下降</td>
+<td>0.834</td>
+<td>-8.3%</td><td>-15.3%</td>
+</tr><tr>
+<td>sh688008</td><td>澜起科技</td>
+<td>61.3%</td><td>19.5%</td><td>12.31%</td>
+<td>64.5%</td><td>0.25</td>
+<td>11.68</td><td>36.76</td>
+<td>0</td>
+<td style="color:#e74c3c">下降</td>
+<td>0.914</td>
+<td>-0.1%</td><td>-22.8%</td>
+</tr><tr>
+<td>sh603005</td><td>晶方科技</td>
+<td>0.1%</td><td>14.9%</td><td>7.88%</td>
+<td>48.1%</td><td>0.27</td>
+<td>4.46</td><td>10.14</td>
+<td>0</td>
+<td style="color:#e74c3c">下降</td>
+<td>0.876</td>
+<td>11.4%</td><td>-19.7%</td>
+</tr><tr>
+<td>sz002335</td><td>科华数据</td>
+<td>13.1%</td><td>17.6%</td><td>6.44%</td>
+<td>24.3%</td><td>0.28</td>
+<td>3.52</td><td>2.6</td>
+<td>0</td>
+<td style="color:#e74c3c">下降</td>
+<td>0.908</td>
+<td>4.9%</td><td>-26.4%</td>
+</tr><tr>
+<td>sz002472</td><td>双环传动</td>
+<td>2.9%</td><td>1.5%</td><td>11.74%</td>
+<td>27.5%</td><td>0.45</td>
+<td>2.87</td><td>3.21</td>
+<td>0</td>
+<td style="color:#e74c3c">下降</td>
+<td>0.978</td>
+<td>4.6%</td><td>-9.1%</td>
+</tr><tr>
+<td>sz002050</td><td>三花智控</td>
+<td>2.7%</td><td>1.4%</td><td>12.41%</td>
+<td>29.0%</td><td>0.27</td>
+<td>4.51</td><td>4.67</td>
+<td>0</td>
+<td style="color:#e74c3c">下降</td>
+<td>0.928</td>
+<td>2.8%</td><td>-27.0%</td>
+</tr><tr>
+<td>sz002111</td><td>威海广泰</td>
+<td>84.3%</td><td>32.2%</td><td>5.15%</td>
+<td>25.4%</td><td>1.57</td>
+<td>—</td><td>—</td>
+<td>0</td>
+<td style="color:#e74c3c">下降</td>
+<td>1.020</td>
+<td>3.5%</td><td>-11.3%</td>
+</tr><tr>
+<td>sz000099</td><td>中信海直</td>
+<td>2.1%</td><td>1.4%</td><td>5.47%</td>
+<td>23.6%</td><td>1.03</td>
+<td>1.88</td><td>4.58</td>
+<td>0</td>
+<td style="color:#e74c3c">下降</td>
+<td>0.939</td>
+<td>-0.8%</td><td>-17.1%</td>
+</tr><tr>
+<td>sz002518</td><td>科士达</td>
+<td>24.8%</td><td>31.5%</td><td>12.60%</td>
+<td>29.1%</td><td>0.18</td>
+<td>3.73</td><td>3.32</td>
+<td>0</td>
+<td style="color:#e74c3c">下降</td>
+<td>0.826</td>
+<td>4.2%</td><td>-41.2%</td>
+</tr><tr>
+<td>sh688686</td><td>奥普特</td>
+<td>10.4%</td><td>33.5%</td><td>6.08%</td>
+<td>59.7%</td><td>0.02</td>
+<td>4.6</td><td>9.59</td>
+<td>0</td>
+<td style="color:#e74c3c">下降</td>
+<td>0.918</td>
+<td>2.8%</td><td>-19.0%</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<h2>三、赛道与主线分布</h2>
+<div class="card">
+<div id="chart_sector" class="chart"></div>
+</div>
+
+<div class="warn">
+<b>R-04 波动率双闸门预警：</b>24只观察池标的中，23只 vol20≥20%（触发"禁S1S2常规建仓，仅S3有限建仓+观察通道"），仅威海广泰 vol20=18.2% 处于正常区间（15-20%）。当前市场波动率环境下，绝大多数标的只能通过观察通道试探仓或S3有限建仓介入，无法执行常规S1/S2建仓。
+</div>
+
+<h2>四、未通过龙头备选（9只）</h2>
+<p style="font-size:13px; color:#888; margin-bottom:12px;">市值上限取消后仍因财报硬过滤未通过的赛道龙头。这些标的在盈利修复或现金流改善后可快速纳入观察池。</p>
+
+<div class="scroll-x">
+<table>
+<thead>
+<tr><th>代码</th><th>名称</th><th>赛道</th><th>主线</th><th>备注</th></tr>
+</thead>
+<tbody>
+<tr><td>sh688981</td><td>中芯国际</td><td>半导体制造</td><td><span class="tag tag-m1">主线1</span></td><td style="color:#888;font-size:12px">ROE 2.0% < 5%</td></tr><tr><td>sh603501</td><td>韦尔股份</td><td>半导体设计</td><td><span class="tag tag-m1">主线1</span></td><td style="color:#888;font-size:12px">净利YoY -41.9% < -12%</td></tr><tr><td>sh600760</td><td>中航沈飞</td><td>航空航天</td><td><span class="tag tag-m1">主线1</span></td><td style="color:#888;font-size:12px">净利-61.7%/营收-55.2%</td></tr><tr><td>sz000768</td><td>中航西飞</td><td>航空航天</td><td><span class="tag tag-m1">主线1</span></td><td style="color:#888;font-size:12px">净利-14.7%/营收-17.0%/ROE 4.9%</td></tr><tr><td>sh600893</td><td>航发动力</td><td>航空航天</td><td><span class="tag tag-m1">主线1</span></td><td style="color:#888;font-size:12px">净利-65.9%/ROE 1.3%</td></tr><tr><td>sh000738</td><td>航发控制</td><td>航空航天</td><td><span class="tag tag-m1">主线1</span></td><td style="color:#888;font-size:12px">数据缺失</td></tr><tr><td>sz300124</td><td>汇川技术</td><td>机器人</td><td><span class="tag tag-m1">主线1</span></td><td style="color:#888;font-size:12px">净利YoY -23.4% < -12%</td></tr><tr><td>sz300760</td><td>迈瑞医疗</td><td>生物医药</td><td><span class="tag tag-m2">主线2</span></td><td style="color:#888;font-size:12px">OCF/净利 < 0.5</td></tr><tr><td>sh688287</td><td>观典防务</td><td>低空经济</td><td><span class="tag tag-m1">主线1</span></td><td style="color:#888;font-size:12px">数据缺失</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>五、筛选漏斗</h2>
+<div class="card">
+<div id="chart_funnel" class="chart" style="height:320px;"></div>
+</div>
+
+<h2>六、配置规则校验</h2>
+<div class="card">
+<table style="font-size:13px;">
+<tr><th>规则</th><th>要求</th><th>当前</th><th>状态</th></tr>
+<tr><td>观察池数量</td><td>8-12只</td><td>24只（Top12优先+12扩展）</td><td style="color:#27ae60;font-weight:600">达标（超过上限取Top12）</td></tr>
+<tr><td>B级及以上</td><td>可排序建仓</td><td>10只B级</td><td style="color:#27ae60;font-weight:600">优于上轮(1只B级)</td></tr>
+<tr><td>主线1(硬科技)上限</td><td>≤3只建仓</td><td>20只在池</td><td style="color:#e67e22;">池中偏多，实际建仓≤3</td></tr>
+<tr><td>主线2(内需)上限</td><td>≤3只建仓</td><td>4只在池（药明/我武/复星/恒瑞）</td><td style="color:#27ae60;">达标</td></tr>
+<tr><td>单一行业≤30%</td><td>预警线</td><td>半导体10只/储能5只/生物医药4只</td><td style="color:#e67e22;">半导体集中度偏高</td></tr>
+<tr><td>单票≤15%</td><td>硬上限</td><td>建仓时由F-04控制</td><td style="color:#27ae60;">建仓阶段执行</td></tr>
+<tr><td>总仓≤80%</td><td>硬上限</td><td>建仓阶段执行</td><td style="color:#27ae60;">建仓阶段执行</td></tr>
+<tr><td>现金≥20%</td><td>硬下限</td><td>建仓阶段执行</td><td style="color:#27ae60;">建仓阶段执行</td></tr>
+<tr><td>vol20≥15(R-04)</td><td>建仓前置条件</td><td>24只中23只vol20≥20</td><td style="color:#e74c3c;font-weight:600">23只仅S3/观察通道</td></tr>
+</table>
+</div>
+
+<h2>七、下一步行动</h2>
+<div class="card">
+<ol style="font-size:13px; line-height:2;">
+<li><b>日常监控</b>：对24只观察池标的执行每日盘后 TRE 状态判定，重点监控 vol20 变化与 MA60 趋势。Top 12 优先监控</li>
+<li><b>观察通道</b>：对 vol20≥20 的23只标的，仅可通过观察通道试探仓介入（F-30/F-32/F-33 全套流程）</li>
+<li><b>正常建仓窗口</b>：仅威海广泰(vol20=18.2%)可执行常规建仓，但需满足 24因子≥80分(A级)且通过六灯校验</li>
+<li><b>建仓频率校准</b>：R-08 要求月建仓2-6次（年6-18笔），当前观察池规模充分支持此频率</li>
+<li><b>未通过龙头跟踪</b>：9只因财报硬过滤未通过的龙头（中芯国际ROE/韦尔净利下滑/沈飞双降等），在盈利修复后可快速纳入</li>
+<li><b>策略文档更新</b>：需将层级1硬过滤"流通市值50-500亿"修订为"流通市值≥50亿(无上限)"，并记录OCF高增长豁免裁决</li>
+</ol>
+</div>
+
+<div class="disclaimer">
+<p>本报告仅供研究参考，不构成个人投资建议。市场有风险，投资需谨慎。所有数据来源于公开市场数据，可能存在延迟或误差。策略回测结果不代表未来表现。</p>
+<p style="margin-top:8px;">中线趋势共振策略 v4.7-R10 | 2026-08-18 | AI辅助人工模式</p>
+</div>
+
+</div>
+
+<script>
+// Filter failure chart
+var chartFilter = echarts.init(document.getElementById('chart_filter'));
+chartFilter.setOption({
+    title: { text: '硬过滤失败原因统计', left: 'center', textStyle: { fontSize: 14 } },
+    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
+    grid: { left: '15%', right: '8%', top: 40, bottom: 30 },
+    xAxis: { type: 'value', name: '命中次数' },
+    yAxis: { type: 'category', data: ["ROE>5%", "现金流/净利>0.5", "净利同比≥-12%", "现金流/净利>0(高增长豁免)", "营收同比≥-15%", "市值≥50亿(无上限)", "日均成交额>5000万"], axisLabel: { fontSize: 12 } },
+    series: [{
+        type: 'bar',
+        data: [36, 29, 27, 13, 8, 5, 3],
+        itemStyle: { color: function(p) { var colors = ['#c0392b','#e67e22','#f39c12','#3498db','#95a5a6','#bdc3c7']; return colors[p.dataIndex % colors.length]; } },
+        label: { show: true, position: 'right', fontSize: 12 }
+    }]
+});
+
+// Sector distribution chart
+var chartSector = echarts.init(document.getElementById('chart_sector'));
+var sectorData = [
+    {value: 4, name: "生物医药"},
+    {value: 3, name: "储能/逆变器"},
+    {value: 3, name: "半导体设备"},
+    {value: 3, name: "半导体封测"},
+    {value: 3, name: "半导体设计"},
+    {value: 2, name: "低空经济"},
+    {value: 1, name: "储能"},
+    {value: 1, name: "航空航天"},
+    {value: 1, name: "储能/数据中心"},
+    {value: 1, name: "机器人"},
+    {value: 1, name: "机器人零部件"},
+    {value: 1, name: "机器人视觉"},
+];
+chartSector.setOption({
+    title: { text: '观察池赛道分布', left: 'center', textStyle: { fontSize: 14 } },
+    tooltip: { trigger: 'item', formatter: '{b}: {c}只 ({d}%)' },
+    legend: { orient: 'vertical', left: 'left', top: 'middle', textStyle: { fontSize: 12 } },
+    series: [{
+        type: 'pie',
+        radius: ['35%', '65%'],
+        center: ['60%', '50%'],
+        data: sectorData,
+        label: { fontSize: 12, formatter: '{b}\n{c}只' }
+    }]
+});
+
+// Funnel chart
+var chartFunnel = echarts.init(document.getElementById('chart_funnel'));
+chartFunnel.setOption({
+    title: { text: '筛选漏斗', left: 'center', textStyle: { fontSize: 14 } },
+    tooltip: { trigger: 'item', formatter: '{b}: {c}只' },
+    series: [{
+        type: 'funnel',
+        left: '15%',
+        right: '15%',
+        top: 50,
+        bottom: 30,
+        width: '70%',
+        gap: 4,
+        label: { show: true, position: 'inside', fontSize: 13 },
+        data: [
+            { value: 84, name: '六赛道候选总数', itemStyle: { color: '#378ADD' } },
+            { value: 82, name: '有效数据', itemStyle: { color: '#85B7EB' } },
+            { value: 58, name: '硬过滤淘汰', itemStyle: { color: '#D85A30' } },
+            { value: 24, name: '通过硬过滤', itemStyle: { color: '#1D9E75' } },
+            { value: 10, name: 'B级(可排序建仓)', itemStyle: { color: '#BA7517' } }
+        ]
+    }]
+});
+
+window.addEventListener('resize', function() {
+    chartFilter.resize();
+    chartSector.resize();
+    chartFunnel.resize();
+});
+</script>
+</body>
+</html>

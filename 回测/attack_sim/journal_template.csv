@@ -1,0 +1,16 @@
+﻿date,candidate,code,name,side,price,shares,amount,pnl,equity,note,gate_a,tre,breadth,s1_confirm,tenor_band,rule_fired
+# 模板说明（此行为注释，使用前删除）：
+# - date: 交易/估值日期 YYYY-MM-DD；candidate: A/B/C（或 CASH=现金）
+# - side: buy/sell；amount: 含费用金额（买=金额×1.001，卖=金额×0.998）
+# - pnl: 卖出结算净盈亏（元）；equity: 当日进攻线账户总净值（含现金+持仓市值）
+# - note: 触发原因（信号/止损/止盈/护栏/强制离场）
+# - 【审计字段·对应复核 P1-04】逐笔记录规则是否实际执行，支持事后审计：
+#   gate_a     : R-04 波动率闸门A（vol20≥15）是否通过（1/0）；vol20<15 当日禁建
+#   tre        : 当日 TRE 状态（S1/S2/S3/S4）；S4 冻结禁建
+#   breadth    : BREADTH 市场广度值（0-30）；<15 禁建（须与 H1 组合）
+#   s1_confirm : R-05 S1 突破确认制是否满足（1/0）；未满足则信号当日不建仓
+#   tenor_band : R-06 止损带宽档位（≤11日=7% / >11日=4%）
+#   rule_fired : 实际触发/拦截的规则编号（如 R-04/R-05/P1/E-P1/P12/熔断III），无则填 "-"
+# 示例行：
+# 2026-09-01,A,510300,沪深300ETF,buy,3.850,13000,50050.5,0,100000,超跌4%触发,1,S3,18,0,7%,R-04
+# 2026-09-18,A,510300,沪深300ETF,sell,3.980,13000,51645.2,1594.7,101594.7,回归MA20止盈,-,S2,20,-,4%,P12

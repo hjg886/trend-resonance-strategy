@@ -1,0 +1,12 @@
+# B3 进攻线个股精选 · 模拟盘台账
+# 生成：2026-08-21 | 依据：B3进攻线模拟盘验证方案.txt + run_attack_b.py B3 变体（阶段1锁定）
+# 规则：入场=当日建仓权限开放（熔断/闸门A vol20≥10/闸门B vol20≥20且S1S2禁/TRE≠S4，回测口径）
+#       + 简化技术评分≥70 + 个股三条件（成交额≥5000万/ATR20P≤10）；⚠️ 无 BREADTH 门槛
+# 离场=P12v6(45/35/25%)/止损8%（收盘≤建仓价×0.92→次日开盘卖）/时间止损30日
+# 字段：date=信号日 tre=TRE状态(回测状态机) breadth=市场广度[仅供信息,非门槛] code=代码 name=名称
+#       score=简化技术评分 signal=信号结论 entry_price=模拟成交价(次日开盘) shares=模拟股数
+#       exit_date=离场日 exit_price=离场价 pnl_pct=盈亏% exit_reason=离场原因(P12止盈/止损8%/时间止损30日)
+#       note=备注
+# 纪律：T-1收盘判定、T日开盘模拟成交；费用按-0.2%；缺记录=当日作废
+date,tre,breadth,code,name,score,signal,entry_price,shares,exit_date,exit_price,pnl_pct,exit_reason,note
+2026-08-21,S2,18.0,——,——,——,暂停(闸门B触发:vol20=20.46≥20且TRE=S2),,,,,,B3首日口径校准：TRE=S2(回测状态机)已脱离S4；闸门B禁建仓(等vol20<20或TRE转S3)
