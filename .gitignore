@@ -12,3 +12,7 @@ kline_pre_*.err
 pre_*_calc.py
 pre_*_result.json
 v5_diff_*.txt
+
+# 助手排查过程产生的临时诊断文件（含 zzz_*/_tmp_*/_chk* 等，非策略产物，勿入库）
+_*.txt
+zzz_*.txt
