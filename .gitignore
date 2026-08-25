@@ -5,3 +5,10 @@ __pycache__/
 回测/data/
 回测/output/
 回测/tmp/
+
+# 盘前临时数据/脚本（非策略产物，每日预取生成，勿入库）
+kline_pre_*.txt
+kline_pre_*.err
+pre_*_calc.py
+pre_*_result.json
+v5_diff_*.txt
