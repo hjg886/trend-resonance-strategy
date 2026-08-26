@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>B2 预研方案 · ETF 评分优化（降动量 + 加估值分位/低波）</title>
+<style>
+  :root{
+    --bg:#f5f7fa; --card:#ffffff; --ink:#1f2937; --sub:#56627a;
+    --line:#e2e8f0; --accent:#2563eb; --good:#0f7a4d; --warn:#b45309; --bad:#b91c1c;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,"PingFang SC","Microsoft YaHei",Segoe UI,sans-serif;
+    line-height:1.65;font-size:15px}
+  .wrap{max-width:980px;margin:0 auto;padding:28px 22px 60px}
+  h1{font-size:24px;margin:0 0 4px}
+  h2{font-size:19px;margin:30px 0 10px;padding-left:10px;border-left:4px solid var(--accent)}
+  h3{font-size:16px;margin:18px 0 6px;color:var(--sub)}
+  .meta{color:var(--sub);font-size:13px;margin-bottom:6px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:18px 20px;margin:14px 0;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+  table{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:#eef2f7;font-weight:600}
+  .ok{color:var(--good);font-weight:600}
+  .warn{color:var(--warn);font-weight:600}
+  .bad{color:var(--bad);font-weight:600}
+  code{background:#eef2f7;padding:1px 6px;border-radius:5px;font-size:13px}
+  .pill{display:inline-block;background:#e0edff;color:var(--accent);border-radius:20px;
+    padding:2px 10px;font-size:12px;margin:2px 4px 2px 0}
+  ul{margin:6px 0 6px 2px;padding-left:20px}
+  li{margin:4px 0}
+  .note{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;font-size:13px;color:#7c4a03}
+  .foot{margin-top:34px;font-size:12px;color:var(--sub);border-top:1px solid var(--line);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>B2 预研方案 · ETF 评分优化</h1>
+<div class="meta">副标题：降低动量权重 + 引入估值分位（代理）与低波因子，改善 ETF 选股质量<br>
+关联版本：中线趋势共振策略 v5.0（A股为主·ETF为辐·开放式漏斗版）｜ 提出日期：2026-08-26 ｜ 状态：预研（待评审，未落地）</div>
+
+<div class="card">
+<b>一句话定位</b>：B1（已落地，rc2）通过收紧 TRE 状态把<b>主引擎整体 OOS 从 2.82% 提到 3.86%</b>；但 ETF 子组件趋势收益仍为负（基线 <code>etf_ann OOS ≈ -14.03%</code>），是主引擎不达标的历史主因。B2 针对 <code>etf_score</code> 这个<b>标的筛选层</b>，降动量、加估值分位/低波，目标在不破坏主引擎整体 OOS≥3.5% 的前提下，扭转 ETF 组件负期望、进一步压低回撤。
+</div>
+
+<h2>一、现状诊断</h2>
+<div class="card">
+<h3>当前 <code>etf_score</code>（scoring.py:165，满分≈91 归一至 100）</h3>
+<table>
+<tr><th>维度</th><th>权重</th><th>因子构成</th><th>动量暴露</th></tr>
+<tr><td>估值</td><td>30</td><td>固定 <code>30 × est_pct</code>（默认 0.6 → 18分），<b>无真实分位，仅中性占位</b></td><td>—</td></tr>
+<tr><td>趋势</td><td>35</td><td>MA60SLOPE(8)+DEV60&gt;0(8)+MAALIGN(7)+<b>RPS20(6×rps)</b>+ret60&gt;0(6/2)</td><td>RPS20 满分 6</td></tr>
+<tr><td>微观</td><td>20</td><td>amount(10)+turnover(10)</td><td>—</td></tr>
+<tr><td>情绪</td><td>15</td><td>VOLRATIO(8)+<b>ret20(7×clip(ret20/8))</b></td><td>ret20 满分 7</td></tr>
+</table>
+<ul>
+<li><b>动量总暴露 ≈ 13/91 ≈ 14%</b>（RPS20 6 + ret20 7）。在高波动市（vol20≥20 频繁出现）动量因子易追高，是 ETF 组件负期望的结构性来源之一。</li>
+<li><b>估值维度形同虚设</b>：固定 <code>est_pct=0.6</code> 对所有 ETF 一视同仁，未区分便宜/贵，丧失选股信息。</li>
+<li><b>缺失低波维度</b>：当前无任何波动率/风险因子，无法在择时之外做"稳健性筛选"。</li>
+</ul>
+</div>
+
+<h2>二、因子可用性确认</h2>
+<div class="card">
+<table>
+<tr><th>目标因子</th><th>现状</th><th>B2 处理方式</th></tr>
+<tr><td>低波（波动率/ATR）</td><td class="ok">已就绪</td><td><code>indicators.py</code> 已有 20日年化波动率(L72)、<code>ATR20P</code>(L59)；ETF row 已携带 <code>ATR20P</code>，单 ETF <code>vol20</code> 由同一函数可算。直接接入 <code>etf_score</code>。</td></tr>
+<tr><td>估值分位</td><td class="warn">需代理新增</td><td>ETF 无 PE/PB 成分数据。用<b>净值/价格 120 日历史分位</b> <code>nav_pct_120</code>（低位=便宜=高分）作代理。需在 <code>indicators.py</code> 新增 ~10 行滚动分位计算，并在 <code>run_backtest.py</code> 数据流提供给 ETF row。</td></tr>
+<tr><td>动量（RPS20/ret20）</td><td class="ok">已有</td><td>保留但<b>降权</b>，作为趋势确认而非主导。</td></tr>
+</table>
+<div class="note">⚠ 代理估值分位提示：ETF 净值分位低位往往与市场低位重合，与趋势因子（MA60SLOPE/DEV60）存在正相关，可能"双重计数"。设计中需对估值分位做正交化处理或降低与趋势的联合权重，避免钝化。</div>
+</div>
+
+<h2>三、B2 设计方案（etf_score v2）</h2>
+<div class="card">
+<h3>3.1 新权重结构（满分直接设为 100，去除原归一 hack）</h3>
+<table>
+<tr><th>维度</th><th>新权重</th><th>因子与得分公式</th><th>较现状变化</th></tr>
+<tr><td>估值分位（代理）</td><td>25</td><td><code>25 × (1 − nav_pct_120/100)</code>，分位10%→22.5，分位90%→2.5</td><td>固定占位 → 真实便宜度</td></tr>
+<tr><td>趋势</td><td>30</td><td>MA60SLOPE(8)+DEV60&gt;0(8)+MAALIGN(7)+<b>RPS20(4×rps↓)</b>+ret60&gt;0(3)</td><td>RPS20 6→4</td></tr>
+<tr><td>低波</td><td>20</td><td><code>20 × clip((30 − vol20)/22, 0, 1)</code>，vol20=8%→20，vol20=30%→0</td><td>新增维度</td></tr>
+<tr><td>微观</td><td>15</td><td>amount(8)+turnover(7)</td><td>20→15</td></tr>
+<tr><td>情绪</td><td>10</td><td>VOLRATIO(5)+<b>ret20(5×clip(ret20/8)↓)</b></td><td>ret20 7→5</td></tr>
+</table>
+<ul>
+<li><b>动量总暴露</b>：RPS20(4)+ret20(5)=9 分（占100的 9%），较现状 13/91(14%) 下降约 35%。</li>
+<li><b>低波新增 20 分</b>，估值用真实分位替代固定 18 分，信息量显著提升。</li>
+</ul>
+
+<h3>3.2 env 开关（默认关，保持 V1 行为可比）</h3>
+<div>
+<span class="pill">BT_B2_ON=0</span> 总开关（=1 启用 B2；默认 0 回退 V1）
+<span class="pill">BT_B2_EST_W=25</span> 估值分位权重
+<span class="pill">BT_B2_VOL_W=20</span> 低波权重
+<span class="pill">BT_B2_MOM_SCALE=0.5</span> 动量缩放系数（RPS20/ret20 乘此）
+</div>
+
+<h3>3.3 代码改动点</h3>
+<table>
+<tr><th>文件</th><th>改动</th></tr>
+<tr><td>scoring.py</td><td><code>etf_score(row, est_pct, b2_on, b2_est_w, b2_vol_w, b2_mom_scale)</code>：b2_on 时走新权重分支，读取 <code>row["nav_pct_120"]</code>、<code>row["vol20"]</code></td></tr>
+<tr><td>indicators.py</td><td>新增 <code>nav_pct_120</code>：净值/价格 120 日滚动百分位（约 10 行）</td></tr>
+<tr><td>run_backtest.py</td><td>L403 调用改为 <code>etf_score(row, est_pct=..., b2_on=BT_B2_ON==1, ...)</code>；确保 ETF row 含 <code>vol20</code>、<code>nav_pct_120</code></td></tr>
+<tr><td>sweep_b2.py（新增）</td><td>扫描 (EST_W × VOL_W × MOM_SCALE) 网格，输出 etf_ann OOS 与主引擎整体 OOS</td></tr>
+</table>
+</div>
+
+<h2>四、回测验证计划</h2>
+<div class="card">
+<ol>
+<li>在 <code>scoring.py</code> 实现 B2 分支（含 env 开关），<code>indicators.py</code> 补 <code>nav_pct_120</code>。</li>
+<li>用 <code>sweep_b2.py</code> 跑网格：EST_W∈{20,25,30} × VOL_W∈{15,20,25} × MOM_SCALE∈{0.3,0.5,0.7}，共 27 组。</li>
+<li>每组记录：<b>etf_ann OOS</b>（核心，目标从 ≈-14% 翻正或显著减亏）、主引擎整体 OOS、最大回撤、年建仓频率。</li>
+<li><b>四关验收</b>（沿用 Track B 铁律）：OOS≥3.5% 且 OOS&gt;IS 且 回撤≤12% 且 频率≥6笔/年。B2 额外硬约束：<b>主引擎整体 OOS 不得较 B1 基线(3.86%) 退化超过 0.3%</b>（ETF 是防守辐，占比有限，不应拖累）。</li>
+<li>达标组取 etf_ann OOS 最优且整体 OOS 不退化者，默认落盘（BT_B2_ON=1）。</li>
+</ol>
+</div>
+
+<h2>五、风险与边界</h2>
+<div class="card">
+<ul>
+<li><b>代理估值分位相关性</b>：净值分位低位≈市场低位，与趋势因子重叠；需正交化或降联合权重，否则钝化选股。</li>
+<li><b>低波踏空</b>：强趋势市低波因子系统性低配上涨 ETF，可能牺牲收益换回撤；用 MOM_SCALE 与 VOL_W 权衡。</li>
+<li><b>作用范围有限</b>：ETF 为防守辐（组合占比约 15%），B2 主要改善 ETF 组件与回撤，对整体 OOS 的边际提升有限，不应期待翻量级变化。</li>
+<li><b>数据可得性</b>：<code>nav_pct_120</code> 依赖 ETF 净值历史长度≥120 日，新上市 ETF 需 fallback（如退回固定 est_pct）。</li>
+</ul>
+</div>
+
+<h2>六、与 B1 的关系</h2>
+<div class="card">
+<span class="pill">B1（已落地 rc2）</span> 改 <b>TRE 状态升级逻辑</b>（择时层）——"何时买"<br>
+<span class="pill">B2（本预研）</span> 改 <b>ETF 标的筛选</b>（选股层）——"买哪个 ETF"<br>
+两者正交、互补：B1 不触碰 etf_score，B2 不触碰 TRE。B2 仅在 ETF 通道生效，不影响个股主进攻线与 B3 进攻线。若 B2 达标，主引擎将形成"择时(B1)+选股(B2)"双优化，ETF 组件由负期望→正期望，组合整体年化有望再小幅上修。
+</div>
+
+<div class="foot">
+免责声明：本方案为策略预研文档，所有因子权重、env 开关取值均为<b>设计提议</b>，未经过回测验证，不构成任何投资建议。实际效果须以 sweep_b2 回测与四关验收为准。策略回测基于历史数据，不代表未来收益。
+</div>
+
+</div>
+</body>
+</html>

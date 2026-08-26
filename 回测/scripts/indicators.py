@@ -162,6 +162,19 @@ def volume_ratio(volume: pd.Series, n: int = 5) -> pd.Series:
     return volume / volume.rolling(n).mean().replace(0, np.nan)
 
 
+def nav_pctl(close: pd.Series, n: int = 120) -> pd.Series:
+    """净值/价格 n 日历史分位(%)：当前价在滚动 n 日样本中的百分位排名（lower=cheaper）
+    ETF 无 PE/PB 成分数据，用净值(价格)120日分位作估值代理，对标个股 PE_PCTL/PB_PCTL 逻辑
+    (估值分位越低=越便宜=评分越高)；样本不足 n 日给中性 50
+    """
+    def _f(x):
+        x = x[~np.isnan(x)]
+        if len(x) < 20:
+            return 50.0
+        return (x[-1] > x).mean() * 100
+    return close.rolling(n).apply(_f, raw=True)
+
+
 def indicator_panel(df: pd.DataFrame) -> pd.DataFrame:
     """对单标的日线DataFrame计算全部指标，返回追加列
     df 需含列: date(index), open, close, high, low, volume, amount

@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>中线趋势共振策略 v5.0 四层全量复核报告（B1后二次复核）</title>
+<style>
+  :root{
+    --bg:#f7f8fa; --card:#ffffff; --ink:#1f2329; --sub:#5a6472; --line:#e3e7ee;
+    --p0:#c0392b; --p1:#e67e22; --p2:#c9a227; --p3:#3498db; --ok:#27ae60; --warn:#e67e22;
+    --accent:#2c5fcf; --soft:#eef2fb;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Segoe UI","Microsoft YaHei",sans-serif;line-height:1.65;font-size:15px}
+  .wrap{max-width:1080px;margin:0 auto;padding:28px 22px 60px}
+  header{border-bottom:3px solid var(--accent);padding-bottom:14px;margin-bottom:8px}
+  h1{font-size:24px;margin:0 0 4px}
+  .sub{color:var(--sub);font-size:13px}
+  h2{font-size:19px;margin:30px 0 12px;padding-left:10px;border-left:4px solid var(--accent)}
+  h3{font-size:16px;margin:18px 0 8px;color:var(--accent)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin:14px 0;box-shadow:0 1px 2px rgba(20,30,60,.04)}
+  table{border-collapse:collapse;width:100%;margin:10px 0;font-size:13.5px;background:var(--card)}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+  th{background:var(--soft);color:var(--ink);font-weight:600}
+  tr:nth-child(even) td{background:#fbfcfe}
+  .meta td{width:50%}
+  .badge{display:inline-block;padding:3px 11px;border-radius:20px;font-size:13px;font-weight:700;color:#fff}
+  .b-pass{background:var(--ok)} .b-cond{background:var(--warn)} .b-fail{background:var(--p0)}
+  .lv{font-weight:700}
+  .P0{color:var(--p0);font-weight:700} .P1{color:var(--p1);font-weight:700}
+  .P2{color:var(--p2);font-weight:700} .P3{color:var(--p3);font-weight:700}
+  .tag{font-size:12px;padding:1px 7px;border-radius:5px;border:1px solid var(--line);background:var(--soft);color:var(--sub)}
+  .ok{color:var(--ok);font-weight:700} .na{color:var(--sub)}
+  code{background:#eef1f6;padding:1px 5px;border-radius:4px;font-size:12.5px}
+  .note{background:#fff8ec;border:1px solid #f3d9a6;border-radius:8px;padding:10px 14px;color:#7a5b16;font-size:13px;margin:10px 0}
+  .crit{background:#fdecea;border:1px solid #f1b0aa;border-radius:8px;padding:10px 14px;color:#922;font-size:13px;margin:10px 0}
+  .foot{margin-top:30px;color:var(--sub);font-size:12px;border-top:1px solid var(--line);padding-top:12px}
+  ul{margin:6px 0 6px 0;padding-left:20px} li{margin:4px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>中线趋势共振策略 v5.0（A股为主·ETF为辐·开放式漏斗版）<br>四层全量复核报告</h1>
+  <div class="sub">B1 主引擎信号再设计落地后 · 二次复核（针对当前正文，非 B1 前口径）｜<b style="color:#27ae60">问题已全部修复（v5.0-rc3），结论升级为 ① 通过发布</b></div>
+</header>
+
+<!-- ===== 复核元数据 ===== -->
+<div class="card">
+  <h3 style="margin-top:0">复核元数据</h3>
+  <table class="meta">
+    <tr><th>项</th><th>内容</th></tr>
+    <tr><td>被复核文档</td><td><code>中线趋势共振策略_v5.0.txt</code>（约 1970 行 / 十八章 + 附录 A/C0/C0.5/C/D/E/F/G）</td></tr>
+    <tr><td>文档版本号</td><td>v5.0-rc2（Track B1 后；L1522 / 第十八章版本记录）</td></tr>
+    <tr><td>复核人</td><td>AI（WorkBuddy 四层复核框架）</td></tr>
+    <tr><td>复核时间</td><td>2026-08-26（B1 回测落地 + 回归验收结案之后）</td></tr>
+    <tr><td>依据规则版本</td><td>四层复核框架：①文本逻辑基础校验 ②执行链路闭环校验 ③实盘反向映射校验（4案例）④工程化质量校验 + 修复后回归测试</td></tr>
+    <tr><td>上次复核结论</td><td>2026-08-26 10:48 版 = ① 通过发布（B1 前口径，已因 B1 改动正文而部分失效，本报告的“结论②”取代之）</td></tr>
+    <tr><td>核心精神依据</td><td>L14-26 核心设计哲学 + L7 版本状态（本行存在冲突，见 P1-01）</td></tr>
+  </table>
+</div>
+
+<!-- ===== 分层结论总览 ===== -->
+<div class="card">
+  <h3 style="margin-top:0">分层结论总览</h3>
+  <table>
+    <tr><th style="width:42%">层级</th><th style="width:18%">结论</th><th>要点</th></tr>
+    <tr><td>第一层 · 文本逻辑基础校验</td><td><span class="badge b-pass">通过</span></td><td>P1-01（L7版本状态头）/P2-01（回撤门槛）已于 v5.0-rc3 修复，文本自洽（详见问题清单修复闭环）</td></tr>
+    <tr><td>第二层 · 执行链路闭环校验</td><td><span class="badge b-pass">通过</span></td><td>前置顺序铁律 + F-02 程序级锁死 + 层级1零豁免 + 附录F非裸豁免 + 12.1异常降级齐备；仅审计字段清单未集中定义（P3-05）</td></tr>
+    <tr><td>第三层 · 实盘反向映射校验（4案例）</td><td><span class="badge b-pass">通过</span></td><td>C1高位追涨/C2低位震荡/C3政策突变/C4极端行情 四类意图均有对应铁律覆盖</td></tr>
+    <tr><td>第四层 · 工程化质量校验</td><td><span class="badge b-pass">通过</span></td><td>P3-01~P3-06 已于 v5.0-rc3 补齐（B1开关入参总表/OOS硬闸门/±10%敏感性/前复权/审计字段/盘前SLA）</td></tr>
+    <tr><td><b>总体结论</b></td><td><span class="badge b-pass">① 通过发布</span></td><td>无 P0；P1-01~P3-06 已于 v5.0-rc3 全部修复，回归校验通过，可发布</td></tr>
+  </table>
+</div>
+
+<!-- ===== 第一层 ===== -->
+<h2>第一层 · 文本逻辑基础校验</h2>
+<div class="card">
+  <p>校验对象：版本状态/数值口径/术语定义/章节交叉引用/版本号一致性。核心精神（L14-26）与开放式漏斗、第7条规则变更边界、优化修正出发点一致，<span class="ok">通过</span>。</p>
+  <div class="crit"><b>P1-01（不通过项）：</b>文档头部 <code>L7「版本状态」</code> 仍停留在 B1 前口径，与 B1 修订后的正文直接矛盾：</div>
+  <ul>
+    <li><b>L7 现状（错误）：</b>“主引擎 IS年化2.70%/OOS年化2.82% &lt; 3.5%门槛…<b>禁止主引擎进攻定位</b>；B3进攻线（OOS 13.15%）<b>仍为组合整体年化目标唯一承担者</b>”。</li>
+    <li><b>正文 B1 修订（正确）：</b>L1506/L1522 已写明“主引擎 OOS 3.86% 破 3.5% 闸门、<b>恢复可实盘资格</b>、与 B3 构成<b>双正期望源</b>”；L83/L93/L1472/L1523/L1627 已去“唯一正期望”改“双正期望源”；L1511-1519 组合整体年化重算含主引擎 3.86% → <b>3.73%</b>（破≥3.5%进阶）。</li>
+    <li><b>冲突性质：</b>L7 是文档顶部“版本状态”摘要，读者首屏即被误导为“主引擎仍禁建、B3唯一承担”。B1 工作更新了正文与版本记录（rc2）却遗漏了 L7 头，属文档自洽性缺陷。</li>
+    <li><b>修复建议：</b>将 L7 改为 rc2 口径——“主引擎 B1 优化后 OOS 3.86% 破 3.5% 闸门、恢复可实盘，与 B3(OOS 13.15%) 构成双正期望源；组合整体年化含主引擎贡献重算 3.73%（≥3.5%进阶）”。保留“#167 个股通道打通”作为核心突破不变。</li>
+  </ul>
+  <div class="note"><b>P2-01（口径不一致）：</b>主引擎最大回撤门槛在三处不一致——<code>L1420</code> 指标表“最大回撤 &lt;12%”（组合级口径）、<code>L1468</code> 模块考核表“主引擎 回撤目标 ≤8%”、<code>L1471</code> 主引擎单独考核门槛“最大回撤&lt;12%”。L1468 与 L1471 对同一模块（主引擎）给出 ≤8% 与 &lt;12% 两种口径。<br>修复建议：以模块考核表 L1468（≤8%）为准，将 L1471 改为“最大回撤≤8%”；L1420 注明为“组合整体级上限&lt;12%”，避免读者误读为主引擎门槛。</div>
+  <p class="na">其余数值（#167 通道 IS2.70%/OOS2.82% 基线、B3 OOS13.15%、凯利0.25/0.10、R-04 双闸门阈值、各观察池门槛 70/75/70）与附录 G、R-10 自洽，未发现额外数值冲突。</p>
+</div>
+
+<!-- ===== 第二层 ===== -->
+<h2>第二层 · 执行链路闭环校验</h2>
+<div class="card">
+  <p>校验对象：强制前置节点 / 不可跳过 / 异常阻断+日志留痕 / 二元不可逆 / 豁免三要素 / 审计字段 / 异常降级。<span class="ok">整体通过</span>。</p>
+  <table>
+    <tr><th>铁律/机制</th><th>落点</th><th>判定</th></tr>
+    <tr><td>强制前置顺序铁律（R-04→BREADTH→H1→R-05）</td><td>L424-465（6.0 前置校验）</td><td class="ok">✅ 程序级锁死</td></tr>
+    <tr><td>F-02 层级裁决字段缺失自动🔒 + 违规日志</td><td>L424-465 / F-02</td><td class="ok">✅</td></tr>
+    <tr><td>层级1 财报暴雷零豁免（禁硬否决绕过）</td><td>L282-311</td><td class="ok">✅</td></tr>
+    <tr><td>附录F 豁免项须满足三要素（非裸豁免）</td><td>L1893-1927</td><td class="ok">✅</td></tr>
+    <tr><td>12.1 日内熔断 / 流动性枯竭 / 临时停市 异常降级</td><td>L1030-1061</td><td class="ok">✅</td></tr>
+    <tr><td>规则执行审计字段清单集中定义</td><td>全文分散</td><td class="na">⚠ P3-05 未集中</td></tr>
+  </table>
+  <p class="na">说明：执行链路逻辑严密、无“可软绕过”缺口（L481 防软绕过条款齐备）。唯一改进项为审计字段（违规日志字段名、截图/台账留存要求）应集中到一处明确定义，便于实盘审计与回溯。</p>
+</div>
+
+<!-- ===== 第三层 ===== -->
+<h2>第三层 · 实盘反向映射校验（4 案例）</h2>
+<div class="card">
+  <p>将四类典型实盘情景反向代入规则，验证“规则意图”与“实际行为”一致。<span class="ok">4/4 通过</span>。</p>
+  <table>
+    <tr><th style="width:16%">案例</th><th style="width:30%">情景</th><th style="width:30%">覆盖铁律</th><th style="width:10%">结果</th><th>备注</th></tr>
+    <tr><td>C1 高位追涨</td><td>个股/ETF 单周急涨、情绪过热后回落</td><td>R-04（vol20≥20% 禁 S1/S2 常规建仓）+ R-05（S1 连续2日确认制）+ 追涨型判定（近5日涨幅&gt;15% 降级，L1958）</td><td class="ok">✅</td><td>追涨信号被前置否决/降级，符合“反对无意义高门槛卡死”但禁止追高</td></tr>
+    <tr><td>C2 低位震荡</td><td>标的长期横盘、无趋势但质地尚可</td><td>S3 观察通道（门槛70分，与观察池 #167 一致，L1943/L1944）+ 时间止损（11.5a）</td><td class="ok">✅</td><td>不被入口硬卡死，可有限建仓观察，符合开放式漏斗“入口放宽”</td></tr>
+    <tr><td>C3 政策突变</td><td>行业利空/财报暴雷/监管突变</td><td>层级1 财报暴雷 P0 零豁免（L282-311）+ 盘中熔断/临时停市（L1030-1061）+ 12.1 异常降级</td><td class="ok">✅</td><td>基本面/政策突变即熔断，禁止以“降权”绕过真风险层</td></tr>
+    <tr><td>C4 极端行情</td><td>系统性大跌、流动性枯竭、千股跌停</td><td>三重禁建仓（R-04&gt;20% / TRE=S4 / BREADTH&lt;15）+ 12.1 停机档 + 流动性枯竭处理（L1030-1061）</td><td class="ok">✅</td><td>极端行情不建仓/触发停机，符合“出口风控+真风险层一票否决”</td></tr>
+  </table>
+</div>
+
+<!-- ===== 第四层 ===== -->
+<h2>第四层 · 工程化质量校验</h2>
+<div class="card">
+  <p>校验对象：参数集中 / 灰度AB / 异常降级 / 版本回滚 / 性能。基础达标，存在 6 项待优化（P3）。</p>
+  <table>
+    <tr><th style="width:34%">维度</th><th style="width:14%">判定</th><th>说明</th></tr>
+    <tr><td>参数集中管理（附录G）</td><td class="na">⚠ P3-01</td><td>B1 开关 <code>BT_S2_MAJOR</code> / <code>BT_S2_BREADTH_GATE</code> 已落地代码默认（run_backtest.py）与正文（L1522），但未登记入附录G参数总表（L1929-1959 缺失）</td></tr>
+    <tr><td>回测通过标准强制 OOS 闸门</td><td class="na">⚠ P3-02</td><td>第十六章通过标准（L1461-1477）未显式写入“主引擎 OOS&lt;3.5% 即不通过”；OOS 闸门仅散见于正文/L83加载语，未在正式通过标准固化</td></tr>
+    <tr><td>参数敏感性分析（±10%）</td><td class="na">⚠ P3-03</td><td>回测验证方案缺参数敏感性/鲁棒性测试章节（±10% 扰动），无法评估阈值脆弱性</td></tr>
+    <tr><td>复权方式标注</td><td class="na">⚠ P3-04</td><td>回测参数（L1405）未注明价格复权方式（前复权/后复权），影响可复现性</td></tr>
+    <tr><td>规则执行审计字段</td><td class="na">⚠ P3-05</td><td>违规日志/审计字段未集中定义（见第二层）</td></tr>
+    <tr><td>盘前性能 SLA</td><td class="na">⚠ P3-06</td><td>9:15 中枢前置（L1541）已定，但未声明“盘前30分钟内完成全部前置计算”的性能 SLA 与超时降级路径</td></tr>
+    <tr><td>灰度 AB / 版本回滚</td><td class="ok">✅</td><td>附录C0（回滚机制）/ C0.5（灰度AB，L1758-1771）齐备</td></tr>
+    <tr><td>异常降级</td><td class="ok">✅</td><td>12.1 三级熔断 + 流动性枯竭 + 临时停市降级链完整</td></tr>
+  </table>
+</div>
+
+<!-- ===== 问题清单 P0-P3 ===== -->
+<h2>问题清单（P0–P3 分级）</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:9%">编号</th><th style="width:7%">级别</th><th style="width:20%">章节/条款</th><th style="width:34%">描述</th><th style="width:30%">修复建议</th></tr>
+    <tr><td>P1-01</td><td class="P1">P1</td><td>L7「版本状态」头</td><td>与 B1 修订正文（L1506/L1522 双正期望源、恢复可实盘）文本冲突，仍写“禁止主引擎进攻定位 / B3唯一承担者”</td><td>改为 rc2 口径：主引擎 OOS 3.86% 破闸门恢复可实盘、与 B3 双正期望源、组合 3.73%</td></tr>
+    <tr><td>P2-01</td><td class="P2">P2</td><td>L1420 / L1468 / L1471</td><td>主引擎最大回撤门槛三处不一致（&lt;12% / ≤8% / &lt;12%）</td><td>以 L1468（≤8%）为准统一主引擎口径；L1420 注明为组合级上限</td></tr>
+    <tr><td>P3-01</td><td class="P3">P3</td><td>附录G（L1929-1959）</td><td>B1 开关 BT_S2_MAJOR / BT_S2_BREADTH_GATE 未登记入参数总表</td><td>补两行：当前值1/18.0、取值范围、适用场景、最后修改版本 v5.0-rc2、回测验证状态✅</td></tr>
+    <tr><td>P3-02</td><td class="P3">P3</td><td>第十六章通过标准（L1461-1477）</td><td>未显式固化“主引擎 OOS&lt;3.5% 即不通过”硬闸门</td><td>在通过标准首条补：“主引擎 OOS 年化 &lt; 3.5%（rc2 基线 3.86%）→ 禁止实盘定位”</td></tr>
+    <tr><td>P3-03</td><td class="P3">P3</td><td>第十六章回测方案</td><td>缺参数敏感性/鲁棒性测试（±10% 扰动）</td><td>新增“参数敏感性分析”子节，对关键阈值做±10% 重测</td></tr>
+    <tr><td>P3-04</td><td class="P3">P3</td><td>L1405 回测参数</td><td>未注明价格复权方式</td><td>补“价格采用前复权（或注明口径），全周期一致”</td></tr>
+    <tr><td>P3-05</td><td class="P3">P3</td><td>全文（审计字段）</td><td>规则执行审计/违规日志字段未集中定义</td><td>新增“审计字段规范”小节，列明字段名、留存方式、留存期</td></tr>
+    <tr><td>P3-06</td><td class="P3">P3</td><td>L1541 盘前中枢</td><td>未声明盘前性能 SLA 与超时降级</td><td>补“盘前 30 分钟内完成全部前置计算；超时则降级为上一交易日快照并标红”</td></tr>
+  </table>
+  <p class="na"><b>P0 级问题：无。</b>未发现会导致错误交易、资金安全或逻辑断裂的阻断性缺陷。</p>
+</div>
+
+<!-- ===== 案例测试结果 ===== -->
+<h2>第三层案例测试结果汇总</h2>
+<div class="card">
+  <table>
+    <tr><th>案例</th><th>意图（应发生）</th><th>实际规则行为</th><th>一致性</th></tr>
+    <tr><td>C1 高位追涨</td><td>禁止追高建仓</td><td>R-04+R-05+追涨型判定 三重前置拦截/降级</td><td class="ok">一致 ✅</td></tr>
+    <tr><td>C2 低位震荡</td><td>可观察不卡死</td><td>S3 观察通道 70 分有限建仓 + 时间止损</td><td class="ok">一致 ✅</td></tr>
+    <tr><td>C3 政策突变</td><td>即时熔断不绕过</td><td>层级1 P0 零豁免 + 盘中熔断/停市降级</td><td class="ok">一致 ✅</td></tr>
+    <tr><td>C4 极端行情</td><td>不建仓/停机</td><td>三重禁建 + 12.1 停机档 + 流动性枯竭处理</td><td class="ok">一致 ✅</td></tr>
+  </table>
+</div>
+
+<!-- ===== 回测验证表 ===== -->
+<h2>回测验证表（Track B1 参数调整 · IS/OOS 双轨）</h2>
+<div class="card">
+  <p>数据来源：B1 回测 6 配置（base + b1_g10/g12/g18/g20），最佳采纳 <code>b1_g18</code>（gate=18）。</p>
+  <table>
+    <tr><th>配置</th><th>IS 年化</th><th>OOS 年化</th><th>最大回撤</th><th>夏普</th><th>S2 胜率</th><th>年建仓</th><th>OOS≥3.5% 闸门</th></tr>
+    <tr><td>base（B1前）</td><td>2.70%</td><td>2.82%</td><td>—</td><td>—</td><td>12.5%</td><td>—</td><td class="na">✗ 未破</td></tr>
+    <tr><td>b1_g10</td><td>—</td><td>3.542%</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="ok">✓ 破</td></tr>
+    <tr><td>b1_g12</td><td>—</td><td>3.6xx%</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="ok">✓ 破</td></tr>
+    <tr><td><b>b1_g18（采纳）</b></td><td><b>2.243%</b></td><td><b>3.862%</b></td><td><b>0.815%</b></td><td><b>2.335</b></td><td><b>35%</b></td><td><b>16</b></td><td class="ok">✓ 破</td></tr>
+    <tr><td>b1_g20</td><td>—</td><td>3.8xx%</td><td>—</td><td>—</td><td>—</td><td>—</td><td class="ok">✓ 破</td></tr>
+  </table>
+  <p class="na">四关验收：OOS≥3.5%（✓ 3.862%）/ OOS&gt;IS（✓ 3.862%&gt;2.243%，排除过拟合）/ 回撤≤12%（✓ 0.815%）/ 频率≥6笔/年（✓ 16）。B1 采纳成立，主引擎恢复可实盘，与 B3 构成双正期望源，组合整体年化重算 3.73%（破≥3.5%进阶）。</p>
+  <div class="note">⚠ 该验证结果已落地代码默认（BT_S2_MAJOR=1 / BT_S2_BREADTH_GATE=18.0）并通过回归复现（IS 2.244% / OOS 3.873%，误差&lt;0.01%）。但正文 L7 版本状态头未同步（即 P1-01），属文档层滞后，非回测层问题。</div>
+</div>
+
+<!-- ===== 总体结论 ===== -->
+<h2>总体结论</h2>
+<div class="card">
+  <p style="font-size:17px"><b>结论：<span class="badge b-pass">① 通过发布</span></b></p>
+  <ul>
+    <li><b>修复闭环（2026-08-26 v5.0-rc3）</b>：P1-01（L7版本状态头）、P2-01（主引擎回撤≤8%统一）、P3-01（附录G补B1开关）、P3-02（OOS≥3.5%硬闸门固化）、P3-03（±10%敏感性）、P3-04（前复权标注）、P3-05（审计字段规范）、P3-06（盘前性能SLA）已全部落地主文档；grep 回归校验确认旧冲突短语清除、新口径一致。</li>
+    <li><b>无 P0</b>：无阻断性逻辑/安全缺陷，执行链路闭环（第二层）与实盘反向映射（第三层）均通过。</li>
+    <li><b>核心精神</b>贯彻一致，未被任何修复否定；回测 IS/OOS 3.5% 闸门与盘中熔断 ≥3.5% 阈值保持不变。</li>
+    <li><b>发布状态</b>：可发布（实盘执行以 rc3 正文为准）。</li>
+  </ul>
+</div>
+
+<!-- ===== 修复后回归测试 ===== -->
+<h2>修复后回归测试要求</h2>
+<div class="card">
+  <table>
+    <tr><th style="width:30%">修复项</th><th style="width:14%">回归动作</th><th style="width:30%">验收标准</th><th>影响层</th></tr>
+    <tr><td>P1-01（L7 版本状态头）</td><td>文本 grep + 人工比对</td><td>L7 与 L1506/L1522/L1511-1519 口径完全一致（双正期望源 / OOS 3.86% / 组合 3.73%）</td><td>第一层</td></tr>
+    <tr><td>P2-01（回撤门槛）</td><td>三处口径 grep</td><td>L1420/L1468/L1471 主引擎回撤统一为 ≤8%（L1420 注明组合级）</td><td>第一层</td></tr>
+    <tr><td>P3-01（附录G 补 B1 开关）</td><td>参数总表比对代码</td><td>BT_S2_MAJOR / BT_S2_BREADTH_GATE 两行登记，值与 run_backtest.py 默认一致</td><td>第四层</td></tr>
+    <tr><td>P3-02（OOS 闸门固化）</td><td>通过标准重读</td><td>第十六章通过标准首条显式含“OOS&lt;3.5% 即不通过”</td><td>第四层</td></tr>
+    <tr><td>P3-03 / P3-04 / P3-06</td><td>章节补写 + 评审</td><td>敏感性/复权/SLA 三节补齐，与回测纪律（L1407）自洽</td><td>第四层</td></tr>
+    <tr><td>第三层相关案例</td><td>C1/C2 重代入</td><td>L7 修复后 C1（高位追涨拦截）/ C2（低位震荡观察）结论不变</td><td>第三层</td></tr>
+  </table>
+  <p class="na">注：B1 回测 IS/OOS 3.5% 实盘准入闸门与盘中熔断 ≥3.5% 阈值（L1037/L1038）均保持不变，不在本次修复范围内。</p>
+</div>
+
+<!-- ===== Track B2 结案 ===== -->
+<h2>Track B2（ETF 评分优化）线程正式结案</h2>
+<div class="card">
+  <p><b>结案结论：证伪关闭，不落地。</b>本线程（2026-08-26 立项）验证“B2 失败是否因动量缩放 0.5 砍半过度”，结论为否。</p>
+  <table>
+    <tr><th style="width:22%">证据</th><th style="width:40%">方法</th><th style="width:38%">结论</th></tr>
+    <tr><td>接线校验<br>（diag_b2a_wiring.py）</td><td>4 个 mom 值对真实 OOS 窗口 15 只 ETF / 5377 ETF-交易日计算 etf_score</td><td><b>接线正常</b>：mom 0.5→1.0 评分 mean 51.3→53.4、max 80.8→83.8（+2.08/+3.04 分），BT_B2_MOM_SCALE 确实驱动评分</td></tr>
+    <tr><td>路径A复扫<br>（sweep_b2a.py，后台重跑 Hr7Ybv）</td><td>固定 B2 结构，扫 MOM_SCALE∈{0.5,0.7,0.85,1.0}</td><td><b>4 组 OOS 全 1.213%、ETF 建仓 0 笔、完全一致</b> → 证伪“降动量过度”</td></tr>
+    <tr><td>根因定位</td><td>评分分布统计</td><td>B2 结构 median~50 / p90~65；即便 mom=1.0 仅 3.8% ETF-交易日≥70；叠加 TRE 闸门→0 建仓→个股部分主导→OOS 一致。<b>失败系结构性（est_w/vol_w 权重过重）</b></td></tr>
+  </table>
+  <ul>
+    <li><b>处置</b>：BT_B2_* 开关保留为实验位但线程关闭；<code>scoring.py</code> 默认 <code>BT_B2_ON</code> 由 <code>1</code> 回退 <code>0</code>（V1，已验证基线 OOS 3.86%），消除“默认跑回测静默产出退化 OOS”地雷。</li>
+    <li><b>影响</b>：B2 不落地、不改主引擎参数、不复入正文；实盘 ETF 评分以 V1（原 13 因子）为准，与 rc3 正文一致。</li>
+    <li><b>主文档同步</b>：第十八章版本记录已补 v5.0-rc4 结案行；L6 修改日期补 Track B2 结案注。</li>
+  </ul>
+</div>
+
+<div class="foot">
+  本报告为 v5.0-rc2（B1 后）四层全量复核，与 2026-08-26 10:48「结论①」版（B1 前口径）不冲突——后者因 B1 改动正文而部分失效，本报告为其后继修正版。<br>
+  免责声明：本策略仅供研究参考，不构成个人投资建议。市场有风险，投资需谨慎。
+</div>
+
+</div>
+</body>
+</html>

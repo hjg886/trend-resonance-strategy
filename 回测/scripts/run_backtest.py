@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 
 sys.path.insert(0, os.path.dirname(__file__))
-from indicators import indicator_panel, ma, ma60_effective_break
+from indicators import indicator_panel, ma, ma60_effective_break, nav_pctl
 from tre import TreState, step_tre
 from scoring import (build_financial_series, fin_at, stock_score, etf_score,
                      layer1_stock, layer1_etf, six_lights, seven_lights, min_nine, f04,
@@ -352,6 +352,9 @@ def build_panels(panels: dict) -> dict:
             cov = ret_a.rolling(60).cov(ret_h)
             var = ret_h.rolling(60).var()
             p["BETA60"] = (cov / var) * 100.0  # 百分比化避免除零
+        # Track B2: ETF 估值分位代理（净值120日分位；ETF 无 PE/PB）→ 供 etf_score 估值维度
+        if nm.startswith("etf_"):
+            p["NAV_PCTL_120"] = nav_pctl(c, 120)
         out[nm] = p
     return out
 
@@ -400,7 +403,7 @@ def compute_score(code: str, dn: str, ptype: str, row: dict, fins: dict, panels:
                     hlist.extend(s[s.index < row.name].tail(120).tolist())
         return stock_score(row, fin, hist_pb, hist_pe)
     else:
-        return etf_score(row, est_pct=0.6)
+        return etf_score(row, est_pct=0.6, nav_pct=row.get("NAV_PCTL_120", 50.0))
 
 
 # ---------------- 主回测 ----------------

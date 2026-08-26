@@ -162,36 +162,85 @@ def stock_score(row: dict, fin: dict | None, hist_pb: list[float],
 
 # ================= ETF 13 因子代理评分 =================
 
-def etf_score(row: dict, est_pct: float = 0.6, prod_ok: bool = True) -> float:
-    """ETF 13 因子综合得分（0-100），回测代理版
-    row: T-1 日指标
-    est_pct: 估值因子得分占比(0-1)，510300 宽基估值回测期用中性 0.6 [代理]
-    prod_ok: 产品健康度
-    权重: 估值30 / 趋势35 / 微观20 / 情绪15
+def etf_score(row: dict, est_pct: float = 0.6, prod_ok: bool = True, nav_pct: float = None) -> float:
+    """ETF 综合得分（0-100），回测代理版
+    Track B2 改造（2026-08-26）：新增估值分位维度 + 低波维度，降动量暴露
+    B2 开关（env，subprocess 级生效）:
+      BT_B2_ON        ="1"(默认) 启用新权重；="0" 回退 V1 行为（与历史基线一致，A/B对照）
+      BT_B2_EST_W    估值分位权重      默认 25
+      BT_B2_VOL_W    低波权重          默认 20
+      BT_B2_MOM_SCALE 动量(RPS20/ret20)缩放 默认 0.5（降约一半）
+    V1 旧权重: 估值30/趋势35/微观20/情绪15（估值用固定 est_pct 占位、无真实分位、无低波）
+    B2 新权重: 估值分位 EST_W / 趋势30 / 低波 VOL_W / 微观15 / 情绪10（满分直设100，去归一hack）
     """
-    # 估值 30 [代理: 中性0.7, 因缺失估值分位因子按中性偏正处理]
-    va = 30 * est_pct
-    # 趋势 35
+    # Track B2 ETF 评分优化 —— 2026-08-26 正式结案（证伪）：
+    #   诊断(diag_b2a_wiring.py)与路径A复扫(sweep_b2a.py)证实：即便 BT_B2_MOM_SCALE=1.0（满动量），
+    #   B2 结构(est_w=25/vol_w=20)仍把 ETF 评分系统性压在 70 门槛下→0 建仓→OOS 退化至 1.21%（hardFAIL）；
+    #   失败系结构性（估值/低波权重过重），非动量缩放。线程关闭，开关保留为实验位；默认回退 V1（已验证基线 OOS 3.86%）。
+    b2_on = os.environ.get("BT_B2_ON", "0") == "1"
+
+    # ---------- V1 回退（BT_B2_ON=0），与历史基线完全一致 ----------
+    if not b2_on:
+        va = 30 * est_pct
+        tr = 0.0
+        tr += 8.0 if row.get("MA60SLOPE") == 1 else (3.0 if row.get("MA60SLOPE") == 0 else 0.0)
+        tr += 8.0 if row.get("DEV60", -999) > 0 else 0.0
+        al = row.get("MAALIGN", 0); tr += 7.0 if al == 3 else (4.0 if al == 2 else 0.0)
+        rps = np.clip(row.get("RPS20", 50) / 100, 0, 1); tr += 6.0 * rps
+        tr += 6.0 if row.get("ret60", -1) > 0 else 2.0
+        tr = min(35, tr)
+        mi = 0.0
+        mi += 10.0 * np.clip(np.log10(row.get("amount", 1e6) / 1e8 + 0.1) / 1.2, 0, 1)
+        mi += 10.0 * np.clip(row.get("turnover", 0) / 2, 0, 1)
+        mi = min(20, mi)
+        em = 0.0
+        em += 8.0 * np.clip(row.get("VOLRATIO", 1.0) / 2, 0, 1)
+        em += 7.0 * np.clip(row.get("ret20", 0) / 8, 0, 1)
+        em = min(15, em)
+        raw = va + tr + mi + em
+        return min(100.0, raw * 100.0 / 91.0)
+
+    # ---------- B2 新结构 ----------
+    est_w = float(os.environ.get("BT_B2_EST_W", "25"))
+    vol_w = float(os.environ.get("BT_B2_VOL_W", "20"))
+    mom = float(os.environ.get("BT_B2_MOM_SCALE", "0.5"))
+    w_tr, w_mi, w_em = 30.0, 15.0, 10.0
+
+    # 估值分位（ETF 无 PE/PB，用净值120日分位代理；lower=cheaper=better，对标 PE_PCTL 逻辑）
+    if nav_pct is None:
+        nav_pct = row.get("NAV_PCTL_120", 50.0)
+    va = est_w * (1.0 if nav_pct <= 70 else max(0.0, (100.0 - nav_pct) / 30.0))
+
+    # 趋势（RPS20 受动量缩放；ret60 中期趋势保留）
     tr = 0.0
     tr += 8.0 if row.get("MA60SLOPE") == 1 else (3.0 if row.get("MA60SLOPE") == 0 else 0.0)
     tr += 8.0 if row.get("DEV60", -999) > 0 else 0.0
     al = row.get("MAALIGN", 0); tr += 7.0 if al == 3 else (4.0 if al == 2 else 0.0)
-    rps = np.clip(row.get("RPS20", 50) / 100, 0, 1); tr += 6.0 * rps
+    rps = np.clip(row.get("RPS20", 50) / 100, 0, 1); tr += 6.0 * rps * mom
     tr += 6.0 if row.get("ret60", -1) > 0 else 2.0
-    tr = min(35, tr)
-    # 微观 20 [代理: 成交/换手, 标定: 宽基大额流动性高分]
+    tr = min(35, tr) * (w_tr / 35.0)
+
+    # 低波（VOL20A 20日年化波动率%，lower=better；30%→0分, 0%→满分）
+    vol = row.get("VOL20A", 20.0)
+    vol_s = max(0.0, (30.0 - vol) / 30.0)
+    vol_block = vol_w * vol_s
+
+    # 微观
     mi = 0.0
     mi += 10.0 * np.clip(np.log10(row.get("amount", 1e6) / 1e8 + 0.1) / 1.2, 0, 1)
     mi += 10.0 * np.clip(row.get("turnover", 0) / 2, 0, 1)
-    mi = min(20, mi)
-    # 情绪 15 [代理: 量比+20日涨幅]
+    mi = min(20, mi) * (w_mi / 20.0)
+
+    # 情绪（ret20 受动量缩放）
     em = 0.0
     em += 8.0 * np.clip(row.get("VOLRATIO", 1.0) / 2, 0, 1)
-    em += 7.0 * np.clip(row.get("ret20", 0) / 8, 0, 1)
-    em = min(15, em)
-    raw = va + tr + mi + em
-    # [代理归一]: 代理版理论满分≈91(估值21+趋势35+微观20+情绪15), 归一化到100分制以对齐80分门槛语义
-    return min(100.0, raw * 100.0 / 91.0)
+    em += 7.0 * np.clip(row.get("ret20", 0) / 8, 0, 1) * mom
+    em = min(15, em) * (w_em / 15.0)
+
+    raw = va + tr + mi + em + vol_block
+    # 归一化到100分制（权重和随 EST_W/VOL_W 变化时保持门槛语义稳定）
+    norm = est_w + w_tr + vol_w + w_mi + w_em
+    return min(100.0, raw * 100.0 / norm)
 
 
 # ================= 层级裁决 =================

@@ -1,0 +1,17 @@
+=== [b2a_e25_v20_m0.5] 已有结果，resume 计算 ===
+=== [b2a_e25_v20_m0.5] OOS_ann=1.213% OOS_etf_ann=nan% OOS_mdd=0.469% OOS_trades=0 ===
+=== [b2a_e25_v20_m0.7] 已有结果，resume 计算 ===
+=== [b2a_e25_v20_m0.7] OOS_ann=1.213% OOS_etf_ann=nan% OOS_mdd=0.469% OOS_trades=0 ===
+=== [b2a_e25_v20_m0.85] 已有结果，resume 计算 ===
+=== [b2a_e25_v20_m0.85] OOS_ann=1.213% OOS_etf_ann=nan% OOS_mdd=0.469% OOS_trades=0 ===
+=== [b2a_e25_v20_m1.0] 已有结果，resume 计算 ===
+=== [b2a_e25_v20_m1.0] OOS_ann=1.213% OOS_etf_ann=nan% OOS_mdd=0.469% OOS_trades=0 ===
+
+===== Track B2 路径 A 汇总（MOM_SCALE 梯度, est_w=25/vol_w=20）=====
+fix                     OOS_ann  OOS_etf  IS_ann OOS_mdd  trd  freq  sharpe   win%  PASS
+b2a_e25_v20_m0.5          1.213      nan    2.32   0.469    0   0.0   2.501    0.0 <hardFAIL
+b2a_e25_v20_m0.7          1.213      nan    2.32   0.469    0   0.0   2.501    0.0 <hardFAIL
+b2a_e25_v20_m0.85         1.213      nan    2.32   0.469    0   0.0   2.501    0.0 <hardFAIL
+b2a_e25_v20_m1.0          1.213      nan    2.32   0.469    0   0.0   2.501    0.0 <hardFAIL
+
+DONE 4/4 配置；最佳 PASS 配置: 无 (OOS=NA)
