@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>中线趋势共振策略 v5.0 · 四层全量复核报告</title>
+<style>
+  :root{
+    --bg:#f5f7fa; --card:#ffffff; --ink:#1f2a37; --sub:#5b6675; --line:#e3e8ef;
+    --ok:#1a7f4b; --okbg:#e7f6ee; --warn:#b7791f; --warnbg:#fdf3e0;
+    --bad:#c0392b; --badbg:#fdecea; --p0:#c0392b; --p1:#d98324; --p2:#b7791f; --p3:#6b7280;
+    --brand:#2c5282; --brandbg:#eaf1f9;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;line-height:1.6;font-size:14px;}
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 22px 60px;}
+  h1{font-size:24px;margin:0 0 4px;color:var(--brand);}
+  h2{font-size:18px;margin:30px 0 12px;padding-left:10px;border-left:4px solid var(--brand);color:var(--ink);}
+  h3{font-size:15px;margin:18px 0 8px;color:var(--ink);}
+  .meta-bar{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px 24px;margin-top:10px;}
+  .meta-bar div{font-size:13px;color:var(--sub);}
+  .meta-bar b{color:var(--ink);font-weight:600;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin-top:14px;box-shadow:0 1px 3px rgba(16,24,40,.04);}
+  .banner{border-radius:10px;padding:16px 20px;font-weight:600;font-size:15px;}
+  .banner.bad{background:var(--badbg);color:var(--bad);border:1px solid #f1b0a8;}
+  .banner.ok{background:var(--okbg);color:var(--ok);border:1px solid #a9dcbf;}
+  .banner.warn{background:var(--warnbg);color:var(--warn);border:1px solid #f0d9a8;}
+  table{width:100%;border-collapse:collapse;margin-top:12px;font-size:13px;}
+  th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top;}
+  th{background:var(--brandbg);color:var(--brand);font-weight:600;white-space:nowrap;}
+  td code{background:#eef2f7;padding:1px 5px;border-radius:4px;font-size:12px;color:#243b53;}
+  .tag{display:inline-block;padding:1px 8px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap;}
+  .t-ok{background:var(--okbg);color:var(--ok);}
+  .t-warn{background:var(--warnbg);color:var(--warn);}
+  .t-bad{background:var(--badbg);color:var(--bad);}
+  .t-p0{background:#fdecea;color:var(--p0);}
+  .t-p1{background:#fdf0e3;color:var(--p1);}
+  .t-p2{background:#fdf3e0;color:var(--p2);}
+  .t-p3{background:#eef0f3;color:var(--p3);}
+  .lv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-top:12px;}
+  .lv{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;}
+  .lv .title{font-weight:700;font-size:14px;margin-bottom:6px;}
+  .lv .verdict{font-size:13px;font-weight:600;margin:6px 0;}
+  .lv .note{font-size:12.5px;color:var(--sub);}
+  .pill{font-size:12px;padding:1px 8px;border-radius:6px;font-weight:600;}
+  .count{font-size:12px;color:var(--sub);margin-top:6px;}
+  ul{margin:8px 0 0;padding-left:20px;}
+  li{margin:3px 0;}
+  .kbd{font-family:monospace;background:#eef2f7;padding:1px 5px;border-radius:4px;}
+  .foot{margin-top:30px;font-size:12px;color:var(--sub);border-top:1px solid var(--line);padding-top:14px;}
+  .hl{background:#fff6e6;padding:0 3px;border-radius:3px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>中线趋势共振策略 v5.0 · 四层全量复核报告</h1>
+  <div style="color:var(--sub);font-size:13px;">核心精神对齐 + 第一层文本逻辑 / 第二层执行链路 / 第三层实盘反向映射 / 第四层工程化质量</div>
+
+  <div class="meta-bar">
+    <div><b>复核对象</b><br>中线趋势共振策略_v5.0.txt</div>
+    <div><b>文件规模</b><br>1966 行 / 约 258 KB</div>
+    <div><b>复核日期</b><br>2026-08-24</div>
+    <div><b>复核框架</b><br>用户自定义四层标准（强制模板）</div>
+    <div><b>复核方式</b><br>全文精读 8 段 + 附录G参数总表 + 回测章节交叉核验</div>
+    <div><b>复核结论</b><br><span class="tag t-bad">③ 不通过（存在 P0）</span></div>
+  </div>
+
+  <!-- ============ 核心精神对齐 ============ -->
+  <h2>〇、核心精神对齐校验</h2>
+  <div class="card">
+    <p><span class="tag t-ok">通过</span> 文档核心精神与用户要求一致，无偏离。</p>
+    <ul>
+      <li><b>反过度保守</b>：L14/L16「反对无意义的高门槛卡死（过度保守=变相不参与股票投资），但在提高收益率基础上做科学控风险」与用户口径一致。</li>
+      <li><b>持久原则</b>：L18「优化修正出发点·持久原则＝通过不断地优化修改提高收益率，同时做好科学风控」已固化入文档最高优先区。</li>
+      <li><b>开放式漏斗</b>：L22–L26 入口放宽筛选（仅三层真风险层一票否决，其余降权）/ 出口收紧止损，与"先求收益→再控风险"优先级铁律一致。</li>
+    </ul>
+    <p class="note" style="color:var(--sub);font-size:12.5px;">核心精神本身无问题；但第一层发现其<b>落地阈值</b>在正文多处自相矛盾（见 P0-01/P0-02），属于"精神正确、参数打架"，须在发布前修复。</p>
+  </div>
+
+  <!-- ============ 分层结论 ============ -->
+  <h2>一、分层结论（通过 / 不通过 / 待优化）</h2>
+  <div class="lv-grid">
+    <div class="lv">
+      <div class="title">核心精神对齐</div>
+      <div class="verdict"><span class="tag t-ok">✅ 通过</span></div>
+      <div class="note">与用户要求完全对齐，无偏离。</div>
+    </div>
+    <div class="lv">
+      <div class="title">第一层 · 文本逻辑基础</div>
+      <div class="verdict"><span class="tag t-bad">❌ 不通过</span></div>
+      <div class="note">阈值体系三值并存（P0×2）+ 派生矛盾（P1×2）+ 数学/口径（P2×3）+ 术语（P3×2）。</div>
+      <div class="count">阻断级：P0-01、P0-02</div>
+    </div>
+    <div class="lv">
+      <div class="title">第二层 · 执行链路闭环</div>
+      <div class="verdict"><span class="tag t-ok">✅ 通过</span></div>
+      <div class="note">前置节点强制、三重保障、手动绕过三要素、异常降级、日志模板、审计链均完整覆盖。</div>
+    </div>
+    <div class="lv">
+      <div class="title">第三层 · 实盘反向映射</div>
+      <div class="verdict"><span class="tag t-warn">⚠️ 待优化</span></div>
+      <div class="note">4 案例反推整体符合修改意图，但 C2 暴露 P0-02 阈值矛盾导致 S3 通道行为不确定。</div>
+    </div>
+    <div class="lv">
+      <div class="title">第四层 · 工程化质量</div>
+      <div class="verdict"><span class="tag t-ok">✅ 通过</span></div>
+      <div class="note">附录G集中管理 / 附录C0回滚 / 附录C0.5灰度AB / 9:15性能约束 / 代理变量体系齐备。</div>
+    </div>
+  </div>
+
+  <!-- ============ 问题清单 ============ -->
+  <h2>二、问题清单（P0–P3 分级）</h2>
+  <div class="card">
+    <p style="font-size:13px;color:var(--sub);margin:0 0 6px;">说明：P0＝阻断发布（AI 裁决门槛不确定，直接影响主进攻线选择性）；P1＝严重（一致性缺陷）；P2＝一般（数学/口径歧义）；P3＝规范（术语/声明）。</p>
+    <table>
+      <thead>
+        <tr><th>编号</th><th>级别</th><th>章节条款</th><th>问题描述</th><th>修复建议</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>P0-01</b></td>
+          <td><span class="tag t-p0">P0</span></td>
+          <td>正文 L384 / L387 / 附录G L1938</td>
+          <td><b>个股常规观察池/建仓入门门槛三值并存</b>：L384「实际建仓入门门槛按P0dCore固化口径＝≥75分」；L387「常规观察池入门门槛维持≥80分」；附录G L1938「个股观察池门槛＝70分（#167 个股通道独立门槛）」。三处给出 70/75/80 三个不同数值，且附录G=70 与正文矛盾。<b>AI 无法确定个股入场门槛</b>，主进攻线（A股个股＝唯一 alpha 源）选择性机制失效。</td>
+          <td>统一以「附录G 为权威参数总表」并消除歧义行名：① 附录G L1938 行名改为「<b>个股通道独立门槛（观察池/S3/观察通道）</b>＝70分（#167）」，明确与"常规个股观察池"区分；新增一行「常规个股观察池门槛＝75分（P0dCore固化基线）」。② L384「≥75分」保留（与基线一致）。③ L387「常规观察池入门门槛维持≥80分」改为「≥75分」，并删除"临时下调至≥75"的退化表述（基线已是75，无法再下调）。</td>
+        </tr>
+        <tr>
+          <td><b>P0-02</b></td>
+          <td><span class="tag t-p0">P0</span></td>
+          <td>正文 L384 / L389 / 附录G L1940–L1941</td>
+          <td><b>S3 有限建仓 / 观察通道门槛直接矛盾</b>：L384「S3有限建仓/观察通道门槛已由≥85分放宽至≥80分（与常规观察池一致）」；但 L389「S3有限建仓/观察通道门槛：v5.0 由≥85分放宽至≥70分」、附录G L1940/L1941 均为「70分」。同一通道在正文两处给出 80 与 70 两个门槛，AI 执行 S3 通道时行为不确定。</td>
+          <td>L384 中「放宽至≥80分（与常规观察池一致）」改为「放宽至≥70分（与 #167 个股通道独立门槛一致，见附录G L1940/L1941）」。确保 L384、L389、L1940、L1941 四处统一为 70。</td>
+        </tr>
+        <tr>
+          <td><b>P1-01</b></td>
+          <td><span class="tag t-p1">P1</span></td>
+          <td>正文 L262 / L315 / L412 / 附录G L1939</td>
+          <td><b>ETF 观察池门槛 80 与 75 矛盾</b>：L262「ETF 13因子综合得分≥80分」、L315「13因子综合得分≥80分（A级）」；L412「ETF综合得分…≥75分（A级）进入候选池（P1-05修复：原≥80已同步降至75）」、附录G L1939「ETF观察池门槛＝75分」。ETF 防守辐门槛两值并存，导致 ETF 候选池口径不一致。</td>
+          <td>L262、L315 的「≥80分」改为「≥75分」，与 L412 及附录G L1939 对齐（P1-05 修复仅落到 L412，漏改 L262/L315）。</td>
+        </tr>
+        <tr>
+          <td><b>P1-02</b></td>
+          <td><span class="tag t-p1">P1</span></td>
+          <td>正文 L386–L387（R-08 频率优化条款）</td>
+          <td><b>R-08 动态门槛机制自相矛盾</b>：L386 称「以回测口径固定 75 分为基线、频率优先模式作为按需触发的安全阀」，但 L387 仍写「常规观察池入门门槛维持≥80分，当连续3个月建仓<3笔时自动触发频率优先模式：临时下调至≥75分」。基线既是 75，"下调至 75"即退化（无法再下调），且"常规≥80"与 L386"固定75基线"直接冲突。</td>
+          <td>重写 R-08 频率优化条款：明确「常规基线＝75分（P0dCore固化）」，频率优先模式语义改为"已启用的渐进安全阀——仅当连续3月建仓<3笔时，放宽 S3/观察通道试探仓的入选弹性（不降低常规池75基线）"，删除"常规≥80""下调至≥75"退化表述。</td>
+        </tr>
+        <tr>
+          <td><b>P2-01</b></td>
+          <td><span class="tag t-p2">P2</span></td>
+          <td>正文 L7 / L1522</td>
+          <td><b>OOS 年化 2.82% 与"OOS 期望全负 −1.81%"并列但无数学桥接</b>：L7/L1522 同时出现「OOS年化2.82%」与「OOS期望全负（−1.81%）」，未说明 2.82% 为含现金管理的组合净年化、−1.81% 为趋势交易单笔期望，易致判定歧义（"年化正却期望负"看似矛盾）。</td>
+          <td>L1522 补充桥接句：「2.82% 为含现金管理配置的组合净 OOS 年化；趋势交易单笔 OOS 期望 −1.81%，96.2% 收益来自现金管理（见 L1506）」。</td>
+        </tr>
+        <tr>
+          <td><b>P2-02</b></td>
+          <td><span class="tag t-p2">P2</span></td>
+          <td>正文 L1516</td>
+          <td><b>3.5% 目标"务实可达"数学错误</b>：L1516「达成≥3.5%所需 B3 年化＝14.9%…接近 B3 OOS 13.15%基准，务实可达」。但 B3 OOS 仅 13.15% < 14.9%，当前 20% 配比下组合＝20%×13.15%＋65%×0.8%＝3.15% < 3.5%，目标实际未达，"可达"判断有误。</td>
+          <td>L1516 改为「3.5% 目标在 20% B3 配比下需 B3 年化≥14.9%；当前 OOS 13.15% 对应组合 3.15%，<b>略低于目标</b>。需 B3 配比提至 25% 或 B3 年化提升至 14.9% 方达标（见 L1517 配比测算）」。</td>
+        </tr>
+        <tr>
+          <td><b>P2-03</b></td>
+          <td><span class="tag t-p2">P2</span></td>
+          <td>正文 L6（附录序列声明）</td>
+          <td><b>附录序列声明遗漏 C0/C0.5</b>：L6 声明「附录序列为 A→C→D→E→F→G（跳过B）」，但文档实际插入了附录C0（L1731 版本回滚）与附录C0.5（L1756 灰度AB），声明未涵盖。</td>
+          <td>L6 改为「附录序列为 A→C0→C0.5→C→D→E→F→G（跳过B，C0/C0.5 为 v4.7-R10-P2 新增工程化附录）」。</td>
+        </tr>
+        <tr>
+          <td><b>P3-01</b></td>
+          <td><span class="tag t-p3">P3</span></td>
+          <td>正文 L439（六灯第1灯）/ 术语体系</td>
+          <td><b>"黄灯"术语游离</b>：六灯体系主体为绿/红二元，但 L439 第1灯出现「S3状态下…（黄灯）」「⚠️档视为准入绿灯」等三态表述，术语表/全局定义未统一"黄灯"含义。</td>
+          <td>术语表补充「黄灯＝观察/减半态（S3 补仓待条件态，非独立裁决色）」，或正文统一用「减半态/观察态」替代"黄灯"。</td>
+        </tr>
+        <tr>
+          <td><b>P3-02</b></td>
+          <td><span class="tag t-p3">P3</span></td>
+          <td>正文 L439 vs L226 / L472</td>
+          <td><b>S3 补仓"黄灯"措辞与 MIN⑤/补仓规则口径待对齐</b>：L439「S3状态下普通持仓补仓须浮盈>15%且行业趋势完好（黄灯）」与 L226 补仓规则、L472 MIN⑤ S3 条款的判定口径需逐字对齐，避免"黄灯"成为游离判定。</td>
+          <td>与 P3-01 一并统一：将 L439「（黄灯）」改为具体判定句「须满足浮盈>15% 且行业趋势完好，否则第1灯判❌」，与 L226/L472 同源。</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============ 第三层 案例 ============ -->
+  <h2>三、案例测试结果表（实盘反向映射 · 4 案例）</h2>
+  <div class="card">
+    <table>
+      <thead>
+        <tr><th>案例</th><th>情景设定</th><th>介入节点</th><th>判定依据条款</th><th>旧行为（v4.7-R10前）</th><th>新行为（v5.0）</th><th>是否符合修改意图</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>C1 高位追涨</b><br>（603259 类）</td>
+          <td>个股短期大涨、市场 <code>vol20≥20</code>、TRE=S1、用户欲追入</td>
+          <td>6.0 前置 → R-04 闸门B → ❌ 当日暂停建仓</td>
+          <td>L430（R-04闸门B：vol20≥20 禁 S1/S2 常规建仓）；L433（R-05 须连续2日稳MA60＋开盘涨幅≤1%）</td>
+          <td>个股门槛 80＋RPS≥30＋R值>0.25 三道硬卡死 → 无差别拦截</td>
+          <td>入口放宽（R值改降权、RPS≥20、门槛 70），但 R-04/R-05 前置闸门仍科学拦截真正高位追涨</td>
+          <td><span class="tag t-ok">✅ 符合</span><br>不因无意义高门槛卡死，而用波动率＋确认制科学控风险</td>
+        </tr>
+        <tr>
+          <td><b>C2 低位震荡</b><br>（横盘龙头）</td>
+          <td><code>vol20=18</code>（15–20 正常区间）、TRE=S3、个股得分 72</td>
+          <td>S3 有限建仓通道 → 6.1 六灯 → MIN⑤＝20%</td>
+          <td>L274（R-04：vol20≥20 禁 S1/S2 但允许 S3）；L270（S3 计划仓位 20%）；L389/L1940（S3 门槛 70，72≥70 通过）</td>
+          <td>个股门槛 80 → 72 被排除 → 六年个股 0 笔（通道死锁）</td>
+          <td>#167 个股通道独立门槛 70 → 72 进入 S3 有限建仓 → 通道打开</td>
+          <td><span class="tag t-ok">✅ 符合</span><br>但<span class="hl">暴露 P0-02</span>：若按 L384 的「≥80」则 72 被排除，与 L389「≥70」矛盾——通道行为不确定</td>
+        </tr>
+        <tr>
+          <td><b>C3 政策突变</b><br>（行业利好）</td>
+          <td>某行业突发政策利好，层级2.5 政策预期 +15 分</td>
+          <td>层级2.5（仅排序）→ 进入六灯</td>
+          <td>L319（政策预期仅排序+15，不否决）；L457（F-02 层级2.5 强制展示）；L458（持仓 P3 失效仍清仓）</td>
+          <td>政策预期始终仅排序不否决（同）</td>
+          <td>同 + F-02 强制展示买入时政策分值；持仓 P3 失效无条件清仓</td>
+          <td><span class="tag t-ok">✅ 一致</span><br>消除"买入看不见、持仓致命"断层（F-02 修复）</td>
+        </tr>
+        <tr>
+          <td><b>C4 极端行情</b><br>（2024-01 流动性危机）</td>
+          <td>市场暴跌、<code>vol20<15</code> 或盘中熔断Ⅲ级</td>
+          <td>R-04 闸门A → 禁一切新建仓；十二章熔断</td>
+          <td>L430（R-04 闸门A：vol20<15 禁建）；十二章熔断条款；L640–649（无成交/停市处置）；L1142（数据缺失铁律：持仓监控不受数据缺失影响）</td>
+          <td>极端行情禁建（同）</td>
+          <td>同 + 异常降级（停市冻结 TRE、不计入时间计数器、持仓清仓指令不中断）</td>
+          <td><span class="tag t-ok">✅ 符合</span><br>风险用"出口"管（持仓止损照常），"入口"R-04 闸门禁新建，科学控风险</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="note" style="color:var(--sub);font-size:12.5px;margin-top:10px;">4 案例反向代入结果：C1/C3/C4 行为符合"开放式漏斗·入口放宽出口收紧"修改意图；C2 验证 #167 个股通道突破有效，但演示出 P0-02 阈值矛盾（L384 写 80、L389 写 70）使 S3 通道在 70–79 分段行为不确定。<b>主观跳过/程序绕过漏洞核查</b>：F-02 程序级锁死（L459 层级裁决缺失即🔒禁止输出）、手动绕过三要素（L925–928 触发条件/审批层级/事后审计）均闭合，未发现裸绕过路径。</p>
+  </div>
+
+  <!-- ============ 回测验证表 ============ -->
+  <h2>四、回测验证表（硬指标核对）</h2>
+  <div class="card">
+    <table>
+      <thead>
+        <tr><th>验证项</th><th>复核要求</th><th>文档落实情况</th><th>结论</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>IS/OOS 分离</td><td>样本内有效 ≠ 样本外失效（过拟合警示）</td><td>主引擎 IS 2.70% / OOS 2.82%（L1503/L1522）；B3 IS 7.04% / OOS 13.15%（OOS&gt;IS 排除过拟合，L1501）</td><td><span class="tag t-ok">✅ 达标</span></td></tr>
+        <tr><td>基准对比</td><td>原门槛数学可行性论证</td><td>6% 门槛因数学不可能废除改 3.5%；现金管理贡献 96.2% 收益归因（L1494/L1506/L1515）</td><td><span class="tag t-ok">✅ 达标</span></td></tr>
+        <tr><td>滑点冲击</td><td>多资金规模滑点/冲击成本测试</td><td>L1452–1459 要求 100/500/1000 万三规模测试＋《滑点冲击测试报告》（前序 P1-03 已做 100/500/1000 万）</td><td><span class="tag t-warn">⚠️ 要求存在</span><br>报告须确认已归档附录D</td></tr>
+        <tr><td>敏感性</td><td>关键参数单变量敏感性</td><td>L1814 R5 S5 敏感性（E-P1 带宽 3/5/7%）；P0d/JOINT 带宽敏感性（7%/4% 综合最优，L1700）</td><td><span class="tag t-ok">✅ 达标</span></td></tr>
+        <tr><td>可复现</td><td>回测口径固化、开关可追溯</td><td><code>BT_UNIV_V5=1</code> 开关；#167 个股通道开启复测口径固化（L1503/L1862）；附录G 参数总表集中管理</td><td><span class="tag t-ok">✅ 达标</span></td></tr>
+        <tr><td>样本外验证</td><td>样本外对照实盘一致性</td><td>2025.1–2026.6 对照（L1546）；极端行情切片 7 类（L1558）</td><td><span class="tag t-ok">✅ 达标</span></td></tr>
+      </tbody>
+    </table>
+    <p class="note" style="color:var(--sub);font-size:12.5px;margin-top:10px;">回测硬指标层面无 P0/P1 阻断项。注意 P2-02 的 3.5% 目标"可达"措辞与实测（13.15%→组合3.15%）存在 0.35pp 缺口，属文字结论偏差，不影响回测方法学有效性。</p>
+  </div>
+
+  <!-- ============ 总体结论 ============ -->
+  <h2>五、总体结论（三选一）</h2>
+  <div class="banner bad">
+    ③ 不通过（存在 P0 问题）— 须先修复阻断级 P0-01、P0-02 后方可发布。
+  </div>
+  <div class="card">
+    <h3>阻断级问题清单（发布前必须清零）</h3>
+    <ul>
+      <li><b>P0-01</b>：个股常规观察池/建仓入门门槛在 L384(≥75) / L387(≥80) / 附录G L1938(=70) 三值并存，主进攻线（A股个股＝唯一 alpha 源）入场门槛不确定。</li>
+      <li><b>P0-02</b>：S3 有限建仓/观察通道门槛在 L384(≥80) 与 L389/附录G L1940–L1941(≥70) 直接矛盾，S3 通道在 70–79 分段行为不确定。</li>
+    </ul>
+    <h3>发布条件（修复 P0 后）</h3>
+    <ul>
+      <li>无 P0 遗留 → 满足"通过发布"前提；</li>
+      <li>剩余 P1-01/P1-02 建议同步修复（否则按"有条件发布"处理，列明：ETF 门槛 80/75 不一、R-08 退化表述，修复期限＝下一版本 v5.0.1）；</li>
+      <li>P2-01/P2-02/P2-03 与 P3-01/P3-02 为规范类，可纳入同批次或后续 P2 版本修复。</li>
+    </ul>
+  </div>
+
+  <!-- ============ 修复后回归测试 ============ -->
+  <h2>六、修复后回归测试说明</h2>
+  <div class="card">
+    <p style="font-size:13px;">禁止"修复即通过"——以下为逐项回归映射（修复后须重跑对应复核项）：</p>
+    <table>
+      <thead>
+        <tr><th>修复项</th><th>修复内容</th><th>须重跑的复核项</th><th>通过判据</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>P0-01</td><td>个股门槛三值统一（常规池75 / 通道独立70，附录G 行名去歧义）</td><td>第一层全量阈值一致性 grep；附录G 与正文交叉核验；第三层 C2 案例重推（72 分按 70 通道准入）</td><td>全文档个股门槛仅出现 <b>75（常规）</b> 与 <b>70（#167 通道）</b> 两值，无第三值；AI 引擎 env（BT_STOCKCHANNEL_V5/门槛）与文档一致</td></tr>
+        <tr><td>P0-02</td><td>S3/观察通道门槛统一为 70（L384 改 80→70）</td><td>第一层阈值一致性 grep（L384/L389/L1940/L1941 四处处处＝70）；第三层 C2 案例重推</td><td>S3 通道在 70–79 分段行为确定性确认：70≤得分&lt;80 标的按 S3 有限建仓准入，无歧义</td></tr>
+        <tr><td>P1-01</td><td>ETF 门槛 L262/L315 改 80→75</td><td>第一层 ETF 门槛一致性 grep；启动指令（L1562+）门槛声明核验</td><td>全文档 ETF 门槛仅 75 一值（L262/L315/L412/附录G L1939）</td></tr>
+        <tr><td>P1-02</td><td>R-08 频率优化条款重写（基线75、去退化表述）</td><td>第一层 R-08 逻辑自洽核验；与核心精神"渐进式启用安全阀"一致性</td><td>L386 与 L387 措辞一致，无"常规≥80""下调至75"矛盾</td></tr>
+        <tr><td>P2-01/P2-02</td><td>OOS 数学桥接；3.5% 目标措辞修正</td><td>第一层数学口径核验；第十六章（L1506/L1516）数字一致性</td><td>2.82% 与 −1.81% 桥接清晰；3.5% 目标标注"当前配比下边界 3.15%，需提配比/年化达标"</td></tr>
+        <tr><td>P2-03/P3-01/P3-02</td><td>附录序列声明；"黄灯"术语统一</td><td>第一层声明与术语表核验</td><td>L6 含 C0/C0.5；全文"黄灯"已统一为"减半态/观察态"或术语表定义</td></tr>
+      </tbody>
+    </table>
+    <p class="note" style="color:var(--sub);font-size:12.5px;margin-top:10px;">回归完成后须重新生成本复核报告第四章（回测验证表不受影响）与第二章问题清单，确认 P0/P1 清零后方可判定为"① 通过发布"。</p>
+  </div>
+
+  <div class="foot">
+    复核范围：<code>e:\fnOS\文档\证券\中线趋势共振策略\中线趋势共振策略_v5.0.txt</code>（1966 行）。本复核仅针对文档自身逻辑一致性、执行闭环与回测证据链，不构成任何投资建议。所有行号引用基于 2026-08-24 版本文档。
+  </div>
+
+</div>
+</body>
+</html>

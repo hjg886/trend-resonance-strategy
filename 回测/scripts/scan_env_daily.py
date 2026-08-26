@@ -36,6 +36,17 @@ BREADTH_MIN = 15.0  # BREADTH < 15 否决层
 MHD_CSV = os.path.join(OUT, "mhd_scores.csv")
 HIST_DAYS = [20, 60, 120, 250]  # 环境恢复趋势统计窗口
 
+# ---- v5.0 动态观察池排除名单（2026-08-25 用户指令：药明康德 603259 移出观察池） ----
+# 仅过滤"每日观察池扫描输出"，绝不修改 bt.UNIVERSE / #167 个股通道回测（保持可复现）。
+# 代码格式：用裸6位代码（与 UNIVERSE 键一致），如 "603259"；为兼容亦接受带前缀形式（如 "sh603259"）。
+# 扩展排除其他标的：在此集合追加代码即可，例如 {"603259", "300760"}。
+OBS_POOL_EXCLUDE = {"603259"}
+
+# ---- 观察池清空开关（2026-08-26 用户指令：清空当前观察池候选所有标的） ----
+# True = 扫描强制返回空池（临时关闭观察池，不影响 bt.UNIVERSE / #167 回测可复现）；
+# 恢复观察池时，将此开关改回 False 即可（OBS_POOL_EXCLUDE 名单保持不变）。
+OBS_POOL_CLEAR_ALL = True
+
 
 def load_breadth():
     import pandas as pd
@@ -115,6 +126,47 @@ def hist_stats(panels, tre_states, breadth_map, days, T):
     return stats
 
 
+def scan_obs_pool(exclude, gate_stock=70.0, gate_etf=75.0):
+    """v5.0 动态观察池：遍历主引擎 UNIVERSE，复用 run_backtest.compute_score（24因子同源），
+    输出得分≥门槛的候选（个股≥70 / ETF≥75，#167 + P0dCore 口径），排除 EXCLUDE 集合。
+    返回 (pool_list, excluded_list)。注意：本函数只读取 UNIVERSE，不修改它（#167 回测可复现）。"""
+    import run_backtest as RB
+    panels0, fins = RB.load_all()
+    panels = RB.build_panels(panels0)
+    if "idx_hs300" not in panels:
+        return [], []
+    days = list(panels["idx_hs300"].index)
+    T = days[-1]
+    if OBS_POOL_CLEAR_ALL:
+        return [], []
+    pool, excluded = [], []
+    for code, (dn, name, ptype, ind) in RB.UNIVERSE.items():
+        if code in exclude or dn in exclude:
+            excluded.append({"code": code, "name": name, "reason": "OBS_POOL_EXCLUDE名单"})
+            continue
+        if dn not in panels:
+            continue
+        df = panels[dn]
+        if T not in df.index:
+            continue
+        row = df.loc[T]
+        try:
+            sc = float(RB.compute_score(code, dn, ptype, row, fins, panels))
+        except Exception as e:
+            continue
+        if not np.isfinite(sc):
+            continue
+        gate = gate_stock if ptype == "stock" else gate_etf
+        close_v = float(row["close"]) if np.isfinite(float(row["close"])) else None
+        if sc >= gate:
+            pool.append({"code": code, "name": name, "ptype": ptype,
+                         "score": round(sc, 1), "gate": gate,
+                         "close": round(close_v, 3) if close_v is not None else None,
+                         "date": T})
+    pool.sort(key=lambda x: x["score"], reverse=True)
+    return pool, excluded
+
+
 def main(date: str | None = None):
     panels0 = load_all()
     panels = build_panels(panels0)
@@ -150,7 +202,17 @@ def main(date: str | None = None):
         print(f"    近{n:>3}日: {s['open_days']}/{s['days']} = {s['open_ratio']*100:.0f}%")
     print("=" * 64)
 
-    rec = {"env": st, "hist": hs, "window": st["window"], "blocks": st["blocks"]}
+    # ---- v5.0 动态观察池候选（得分≥门槛过滤 + EXCLUDE 排除） ----
+    pool, excluded = scan_obs_pool(OBS_POOL_EXCLUDE)
+    print(f"  📋 动态观察池候选: {len(pool)} 只（得分≥门槛, 已排除 {sorted(OBS_POOL_EXCLUDE)}）")
+    for r in pool[:15]:
+        print(f"    · {r['code']} {r['name']:<10} [{r['ptype']}] 得分{r['score']:.1f}/门槛{r['gate']:.0f} 收{r['close']}")
+    if excluded:
+        print(f"  🚫 排除名单生效: {', '.join(e['name'] + '(' + e['code'] + ')' for e in excluded)}")
+    print("=" * 64)
+
+    rec = {"env": st, "hist": hs, "window": st["window"], "blocks": st["blocks"],
+           "obs_pool": pool, "obs_excluded": excluded, "obs_exclude_list": sorted(OBS_POOL_EXCLUDE)}
     out_file = os.path.join(OUT, f"env_daily_scan_{T}.json")
     with open(out_file, "w", encoding="utf-8") as fh:
         json.dump(rec, fh, ensure_ascii=False, indent=1)

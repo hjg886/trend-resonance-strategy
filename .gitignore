@@ -21,3 +21,9 @@ zzz_*.txt
 kline_mid_*
 mid_0825*
 zzz_*.py
+
+# 盘后(EOD)临时数据/脚本（非策略产物，每日盘后预取生成，勿入库；与盘前 kline_pre_*/pre_* 同类）
+kline_eod*.txt
+kline_eod*.err
+eod_*_calc.py
+eod_*_result.json

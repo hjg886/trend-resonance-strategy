@@ -218,6 +218,9 @@ EP1_ETF_OFF = os.environ.get("BT_EP1_ETF_OFF", "0") == "1"
 # P0-3: BREADTH 否决层（MHD 宽度<阈值时拒绝建仓, 附加否决非许可）
 BREADTH_VETO_ON = os.environ.get("BT_BREADTH_VETO", "1") == "1"  # P0d-core固化: 默认开
 BREADTH_MIN = float(os.environ.get("BT_BREADTH_MIN", "15.0"))
+# Track B1（2026-08-26）S2 状态收紧开关：多数核心指数 ADX≥20 + BREADTH 宽度确认才判 S2，否则降 S3
+S2_MAJOR_ON = os.environ.get("BT_S2_MAJOR", "1") == "1"
+S2_BREADTH_GATE = float(os.environ.get("BT_S2_BREADTH_GATE", "18.0"))
 # MHD 评分数据路径
 MHD_CSV = os.path.join(OUT, "mhd_scores.csv")
 # ============ P12 移动止盈引擎（P12v6固化, 2026-08-18） ============
@@ -476,7 +479,9 @@ def run_backtest(panels: dict, fins: dict, days: list, period: tuple, label: str
         hs300_below_streak = float(h["BELOW_STREAK"])
         hs300_gt = bool(h["close"] > h["MA60"])
         step_tre(tre, i, core_adx, cross20, vol20, hs300_below_streak, hs300_gt,
-                 variant=TRE_VARIANT, obs_guard=OBSGUARD_ON)
+                 variant=TRE_VARIANT, obs_guard=OBSGUARD_ON,
+                 s2_major_on=S2_MAJOR_ON, breadth=breadth_map.get(t1, 30.0),
+                 s2_breadth_gate=S2_BREADTH_GATE)
         tre_hist.append(tre.state)
 
         # ---------- R-04 波动率环境双闸门（v4.7-R10 重构，建仓第一前置条件） ----------

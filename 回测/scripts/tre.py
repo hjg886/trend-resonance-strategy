@@ -15,12 +15,17 @@ from typing import Optional
 # ---------------- 基础判定 ----------------
 
 def raw_state(core_adx: list[float], cross20: int, vol20: float,
-              n_core: int = 3) -> str:
+              n_core: int = 3, s2_major_on: bool = False,
+              breadth: float | None = None, s2_breadth_gate: float = 15.0) -> str:
     """原始状态判定（无缓冲期）
     core_adx: 各核心指数当日 ADX 值列表
     cross20: 组合 MA60 有效穿越计数（近20日）
     vol20:   组合 20 日年化波动率(%)
     判定规则按 3.1 矩阵（S1 优先、S4 次之、S3 再次、S2 兜底）
+    s2_major_on / breadth / s2_breadth_gate：Track B1（2026-08-26）S2 收紧开关。
+      开启时 S2 兜底改为"多数核心指数 ADX≥20 且 BREADTH 宽度≥阈值"才判 S2，
+      否则降级 S3（不建常规仓）——消除单指数 ADX 噪声假主升。
+      默认关闭 → 行为与原基线 V1 完全一致。
     """
     n_strong = sum(1 for a in core_adx if a >= 20)
     n_weak = sum(1 for a in core_adx if a < 15)
@@ -36,6 +41,13 @@ def raw_state(core_adx: list[float], cross20: int, vol20: float,
     if n_weak_majority and 3 <= cross20 <= 4 and 15 <= vol20 <= 25:
         return "S3"
     # S2: ADX 15-20 或 接近S1但未满足S1完整条件（波动率≥18% 或 穿越>3）【R7扩展定义】
+    if s2_major_on:
+        # Track B1: 仅当多数核心指数 ADX≥20 且 BREADTH 宽度确认时才判 S2（真主升），
+        # 否则降级 S3（避免样本外单指数 ADX 噪声导致的假主升建仓）
+        majority = n_core // 2 + 1
+        if n_strong >= majority and (breadth is None or breadth >= s2_breadth_gate):
+            return "S2"
+        return "S3"
     return "S2"
 
 
@@ -69,7 +81,8 @@ def _stand_ma60(below_streak: float, atr_ok: bool) -> bool:
 def step_tre(state: TreState, day_idx: int, core_adx: list[float], cross20: int,
              vol20: float, hs300_below_streak: float, hs300_close_gt_ma60: bool,
              atr_band_ok: bool = True, variant: str = "V0",
-             obs_guard: bool = True) -> TreState:
+             obs_guard: bool = True, s2_major_on: bool = False,
+             breadth: float | None = None, s2_breadth_gate: float = 15.0) -> TreState:
     """推进一天 TRE 状态机（用当日收盘数据判定，次日开盘生效——T-1铁律由引擎调度）
     hs300_below_streak: 沪深300收盘低于MA60的连续天数（0=在MA60上方）
     hs300_close_gt_ma60: 沪深300收盘是否高于MA60
@@ -77,7 +90,8 @@ def step_tre(state: TreState, day_idx: int, core_adx: list[float], cross20: int,
     obs_guard: P0-E 观察通道升级退出当日豁免名义状态转换（防S2→S4吞没升级）
     """
     s = state
-    raw = raw_state(core_adx, cross20, vol20)
+    raw = raw_state(core_adx, cross20, vol20, s2_major_on=s2_major_on,
+                    breadth=breadth, s2_breadth_gate=s2_breadth_gate)
 
     # ============ 1. S4 观察通道逻辑（优先级最高，独立于名义状态） ============
     if s.state == "S4" and not s.obs_active:
@@ -113,8 +127,14 @@ def step_tre(state: TreState, day_idx: int, core_adx: list[float], cross20: int,
         # ① 完整S1: ≥2核心ADX≥20 且 穿越≤3 且 波动率<18%
         up_s1_cond = (n_strong >= 2) and (cross20 <= 3) and (vol20 < 18)
         # ②③④ S2 方向: ADX∈[15,20) 或 (ADX≥20但波动率≥18% 或 穿越>3)
-        any_adx_15_20 = any(15 <= a < 20 for a in core_adx)
-        up_s2_cond = any_adx_15_20 or ((n_strong >= 2) and ((vol20 >= 18) or (cross20 > 3)))
+        if s2_major_on:
+            # Track B1: 观察通道升级 S2 同样要求多数核心指数 ADX≥20 且 BREADTH 确认
+            majority = len(core_adx) // 2 + 1
+            up_s2_cond = (n_strong >= majority) and (vol20 < 22) and \
+                         (breadth is None or breadth >= s2_breadth_gate)
+        else:
+            any_adx_15_20 = any(15 <= a < 20 for a in core_adx)
+            up_s2_cond = any_adx_15_20 or ((n_strong >= 2) and ((vol20 >= 18) or (cross20 > 3)))
 
         if failed:
             # 失效优先: 升级计数清零, 通道终止

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>v5.0 阈值矛盾修复 · 回归确认</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif; background: #f5f6f8; color: #1f2329; line-height: 1.6; padding: 28px; }
+  .wrap { max-width: 1040px; margin: 0 auto; background: #ffffff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); overflow: hidden; }
+  header { background: linear-gradient(135deg, #2b6cb0, #1a4d80); color: #fff; padding: 24px 28px; }
+  header h1 { font-size: 21px; font-weight: 700; }
+  header p { font-size: 13px; opacity: .9; margin-top: 6px; }
+  .body { padding: 24px 28px 32px; }
+  h2 { font-size: 16px; margin: 26px 0 12px; padding-left: 10px; border-left: 4px solid #2b6cb0; color: #1a4d80; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 8px 0 4px; }
+  th, td { border: 1px solid #e3e6eb; padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: #eef3f8; font-weight: 600; color: #1a4d80; }
+  tr:nth-child(even) td { background: #fafbfc; }
+  .tag { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; }
+  .p0 { background: #fde8e8; color: #c0392b; }
+  .p1 { background: #fef3e2; color: #b9770e; }
+  .ok { background: #e6f6ec; color: #1e7e45; }
+  .old { color: #c0392b; text-decoration: line-through; }
+  .new { color: #1e7e45; font-weight: 700; }
+  .note { font-size: 12px; color: #5a6573; background: #f0f4f8; padding: 10px 14px; border-radius: 8px; margin: 10px 0; }
+  .verdict { margin: 18px 0; padding: 16px 20px; border-radius: 10px; background: #e6f6ec; border: 1px solid #9ed5b3; }
+  .verdict b { color: #1e7e45; font-size: 15px; }
+  code { background: #eef3f8; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+  footer { font-size: 11px; color: #8a93a0; padding: 14px 28px; border-top: 1px solid #eef0f3; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>v5.0 阈值矛盾修复 · 回归确认</h1>
+  <p>目标文件：中线趋势共振策略_v5.0.txt ｜ 修复日期：2026-08-25 ｜ 关联报告：v5.0四层复核报告_2026-08-24.html</p>
+</header>
+<div class="body">
+
+  <div class="note">
+    <b>权威口径判定：</b>以文档自身权威源为准 —— 附录G L1938=70 / R-10 L1704（ETF宽基75·行业78、个股通道独立门槛70、S3·观察通道70）/ #167 L253=70。
+    早前复核报告曾误判"常规个股池=75"，本次回归已纠正为正确权威值 <b>个股观察池=70分</b>（与附录G/R-10/#167 一致）。
+  </div>
+
+  <h2>一、修复项总表（P0-01 / P0-02 / P1-01 / P1-02 + 衍生清洗）</h2>
+  <table>
+    <tr><th>编号</th><th>级别</th><th>修复位置</th><th>原值 → 新值</th></tr>
+    <tr><td>P0-01</td><td><span class="tag p0">P0</span></td><td>L384 门槛口径说明</td><td><span class="old">≥75分</span> → <span class="new">≥70分（#167）</span></td></tr>
+    <tr><td>P0-01</td><td><span class="tag p0">P0</span></td><td>L387 常规观察池入门门槛</td><td><span class="old">≥80分</span> → <span class="new">≥70分</span></td></tr>
+    <tr><td>P0-01</td><td><span class="tag p0">P0</span></td><td>附录G 新增行</td><td>新增「个股月度主线准入门槛=75分」（层级2，与观察池70构成宽入口+紧月度双闸）</td></tr>
+    <tr><td>P0-02</td><td><span class="tag p0">P0</span></td><td>L385 S3/观察通道门槛</td><td><span class="old">≥80分</span> → <span class="new">≥70分</span></td></tr>
+    <tr><td>P0-02</td><td><span class="tag p0">P0</span></td><td>L390 S3空池阈值</td><td><span class="old">&lt;80分</span> → <span class="new">&lt;70分</span></td></tr>
+    <tr><td>P0-02</td><td><span class="tag p0">P0</span></td><td>L391 退出恢复门槛</td><td><span class="old">恢复80分</span> → <span class="new">恢复70(个股)/75(ETF)</span></td></tr>
+    <tr><td>P0-02</td><td><span class="tag p0">P0</span></td><td>L395 信号质量复核</td><td><span class="old">≥75分</span> → <span class="new">≥65分</span></td></tr>
+    <tr><td>P0-02</td><td><span class="tag p0">P0</span></td><td>L1575 启动清单</td><td><span class="old">Top3+80分</span> → <span class="new">Top3+70分</span></td></tr>
+    <tr><td>P0-02</td><td><span class="tag p0">P0</span></td><td>L795 / L1378 / L1553 资格·档位</td><td><span class="old">80分资格/80分档/80分持有门槛</span> → <span class="new">70分</span></td></tr>
+    <tr><td>P1-01</td><td><span class="tag p1">P1</span></td><td>L262 / L315 ETF 13因子</td><td><span class="old">≥80分</span> → <span class="new">≥75分</span></td></tr>
+    <tr><td>P1-01</td><td><span class="tag p1">P1</span></td><td>L1666 F-12 ETF扩展</td><td><span class="old">13因子≥80分</span> → <span class="new">13因子≥75分</span></td></tr>
+    <tr><td>P1-02</td><td><span class="tag p1">P1</span></td><td>L386 R-08基线</td><td><span class="old">回测固定75分基线</span> → <span class="new">#167 70分实盘基线（75仅敏感性上界）</span></td></tr>
+    <tr><td>P1-02</td><td><span class="tag p1">P1</span></td><td>L388 频率优先下调</td><td><span class="old">下调至≥75分</span> → <span class="new">个股≥65 / ETF≥70</span></td></tr>
+    <tr><td>P1-02</td><td><span class="tag p1">P1</span></td><td>L389 ETF动态下调说明</td><td>修正"ETF不参与动态下调" → <span class="new">频率优先模式触发时ETF同步下调至≥70</span></td></tr>
+    <tr><td>衍生</td><td><span class="tag ok">清洗</span></td><td>L803 / L698 / L1399 洗仓封堵</td><td><span class="old">常规80分门槛</span> → <span class="new">常规70分观察池门槛</span>（重购≥85分不变）</td></tr>
+  </table>
+
+  <h2>二、修复后权威阈值总表（正文 ↔ 附录G 交叉核验）</h2>
+  <table>
+    <tr><th>阈值指标</th><th>权威值</th><th>正文落地条款</th><th>附录G 行</th><th>一致</th></tr>
+    <tr><td>个股观察池门槛</td><td><b>70分</b></td><td>L384 / L253 / L243</td><td>L1938</td><td><span class="tag ok">✓</span></td></tr>
+    <tr><td>个股月度主线准入</td><td><b>75分</b></td><td>L314（层级2）</td><td>L1939(新)</td><td><span class="tag ok">✓</span></td></tr>
+    <tr><td>ETF观察池门槛</td><td><b>75分</b></td><td>L262 / L315 / L412</td><td>L1940</td><td><span class="tag ok">✓</span></td></tr>
+    <tr><td>S3有限建仓门槛</td><td><b>70分</b></td><td>L385 / L389 / L237</td><td>L1941</td><td><span class="tag ok">✓</span></td></tr>
+    <tr><td>观察通道建仓门槛</td><td><b>70分</b></td><td>L239 / L389 / L244</td><td>L1942</td><td><span class="tag ok">✓</span></td></tr>
+  </table>
+
+  <h2>三、回归校验</h2>
+  <div class="note">
+    <b>① 阈值一致性 grep：</b>全文已无 <code>≥80分</code> 实盘得分阈值残留。唯一匹配 L412 为"原≥80分已同步降至75分"历史注；L1491 / L1847 为回测发现（"R-05在80分门槛下完全冗余"），属历史结论保留，非当前阈值。<br>
+    <b>② 附录G ↔ 正文：</b>5项关键门槛全部一一对应，新增「个股月度主线准入=75」行消除"观察池70 vs 月度准入75"潜在误读。<br>
+    <b>③ 第三层 C2 案例（低位震荡 / S3 有限建仓）反向代入：</b>某 quality 个股24因子得分=72，处 S3 市场（vol20=18%）。修复前 L385 口径=≥80 → 拒入 S3 建仓，而 L389/附录G=≥70 → 应入，行为矛盾；修复后全文统一=≥70 → 一致进入 S3 建仓（Top3+70分），符合 #167"放宽入口、反对无意义高门槛卡死"修改意图。旧 vs 新行为差异已消除。
+  </div>
+
+  <div class="verdict">
+    <b>总体结论：P0 / P1 已清零。</b><br>
+    原四层复核报告结论③（不通过）的阻断级问题（P0-01 个股观察池三值并存、P0-02 S3/观察通道80vs70冲突）现已修复，正文与附录G完全自洽。
+    v5.0 由「③ 不通过」升级为「① 通过发布 / ② 有条件发布」（无 P0 问题，P1 问题已随 P0 一并清零）。
+    <br><br>
+    <b>修复后回归说明：</b>本次修复后已重跑第一层阈值一致性 grep + 第三层 C2 案例代入 + 附录G 交叉核验，三项回归全绿，未采用"修复即通过"；建议随下次例行 <code>git push</code> 入库（沙箱无凭据，未自动提交）。
+  </div>
+
+</div>
+<footer>本报告由 WorkBuddy 生成，仅供策略迭代复核参考。市场有风险，投资需谨慎。</footer>
+</div>
+</body>
+</html>
