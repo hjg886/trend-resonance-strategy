@@ -1,4 +1,4 @@
-.workbuddy/
+.workbuddy/*
 __pycache__/
 *.pyc
 *.bak_*
@@ -27,3 +27,7 @@ kline_eod*.txt
 kline_eod*.err
 eod_*_calc.py
 eod_*_result.json
+
+# 项目级 Skill（策略专属，随库版本管理；其余 .workbuddy 内容如 memory/ 仍忽略）
+!.workbuddy/skills/
+!.workbuddy/skills/tre-oos-optimization/
