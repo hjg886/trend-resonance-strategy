@@ -2,11 +2,11 @@
 """
 模拟盘数据增量刷新管线（2026-08-21 新增）
 ====================================
-用途: 每日/每周增量刷新 B3 模拟盘所需数据, 供 scan_b3_daily.py 使用
+用途: 每日/每周增量刷新 B3 模拟盘所需数据, 供 B3信号单.py（72池 cand_meta）使用
 
 刷新范围:
-  1. 指数 idx_hs300 / idx_sh / idx_sz —— 批量拉取（现有数据止于 2026-06-30, 首次需补缺）
-  2. 观察池 24 只个股 stk_* —— 批量拉取（现有数据止于 2026-08-18）
+  1. 指数 idx_hs300 / idx_sh / idx_sz —— 批量拉取
+  2. B3 72 池个股 stk_*（cand_meta.json M 动态生成）—— 批量拉取, 分块(≤20/批)避免单次标的数超限
   3. 现金ETF etf_159650 —— 单股拉取（批量接口混入ETF报 KLINE_006, 须单独查询）
 
 通道: westockdata skill（npx westock-data-skillhub@1.0.5 kline, 每请求硬上限250行）
@@ -21,25 +21,27 @@ import os, re, subprocess, time, json
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, "..", "data")
 
-NODE_DIR = r"C:\Users\hanji\.workbuddy\binaries\node\versions\22.22.2"
+NODE_DIR = r"C:\Users\hanji\.workbuddy\binaries\node\versions\22.22.2-2"
 NPX = os.path.join(NODE_DIR, "npx.cmd")
 
-# ---------------- 标的清单 ----------------
-# (csv文件名, westock symbol, 中文名, 类型)
-STOCKS = [
-    ("stk_603259", "sh603259", "药明康德"), ("stk_300357", "sz300357", "我武生物"),
-    ("stk_605117", "sh605117", "德业股份"), ("stk_688120", "sh688120", "华海清科"),
-    ("stk_002371", "sz002371", "北方华创"), ("stk_300750", "sz300750", "宁德时代"),
-    ("stk_600196", "sh600196", "复星医药"), ("stk_002156", "sz002156", "通富微电"),
-    ("stk_688082", "sh688082", "盛美上海"), ("stk_300661", "sz300661", "圣邦股份"),
-    ("stk_300693", "sz300693", "盛弘股份"), ("stk_600276", "sh600276", "恒瑞医药"),
-    ("stk_600584", "sh600584", "长电科技"), ("stk_688239", "sh688239", "航宇科技"),
-    ("stk_603986", "sh603986", "兆易创新"), ("stk_688008", "sh688008", "澜起科技"),
-    ("stk_603005", "sh603005", "晶方科技"), ("stk_002335", "sz002335", "科华数据"),
-    ("stk_002472", "sz002472", "双环传动"), ("stk_002050", "sz002050", "三花智控"),
-    ("stk_002111", "sz002111", "威海广泰"), ("stk_000099", "sz000099", "中信海直"),
-    ("stk_002518", "sz002518", "科士达"), ("stk_688686", "sh688686", "奥普特"),
-]
+# ---------------- 标的清单（动态：B3 72 池 from cand_meta.json，2026-09-07 改造） ----------------
+# 原 24 只观察池(scan_b3_daily / run_attack_b.OBS_POOL)已退休；B3 日度扫描统一使用
+# cand_meta.json 的 72 池(M 列表)，refresh 与之同步，避免"池子不一致/数据陈旧"坑。
+def load_b3_pool():
+    meta_path = os.path.join(BASE_DIR, "..", "tmp", "sectors", "cand_meta.json")
+    if not os.path.exists(meta_path):
+        print("[WARN] cand_meta.json 缺失, STOCKS 为空（请先生成候选池）")
+        return []
+    obj = json.load(open(meta_path, encoding="utf-8"))
+    names = obj.get("names", {})
+    M = obj.get("M", [])
+    out = []
+    for code in M:
+        c6 = code[2:] if code[:2] in ("sh", "sz") else code
+        out.append((f"stk_{c6}", code, names.get(code, c6)))
+    print(f"[INFO] B3 72 池加载 {len(out)} 只（cand_meta.json M）")
+    return out
+STOCKS = load_b3_pool()
 INDICES = [
     ("idx_hs300", "sh000300", "沪深300指数"),
     ("idx_sh", "sh000001", "上证指数"),
@@ -135,8 +137,8 @@ def merge_append(name, new_rows):
     return added, (rows[-1][0] if rows else None)
 
 
-def refresh_group(items, group_name, batch=True):
-    """按 group 批量刷新: items=[(name, symbol, label)]"""
+def refresh_group(items, group_name, batch=True, chunk=20):
+    """按 group 批量刷新: items=[(name, symbol, label)]。batch 时按 chunk 分块调 westockdata。"""
     print(f"\n===== {group_name} =====", flush=True)
     summary = {}
     # 按现有最后日期分桶: 需要拉取的标的 → (start, symbols)
@@ -158,8 +160,12 @@ def refresh_group(items, group_name, batch=True):
         return {n[0]: {"label": n[2], "added": 0, "note": "already fresh"} for n in need}
 
     if batch:
-        syms = [n[1] for n in need]
-        data = run_kline(syms, min_start, today)
+        data = {}
+        chunks = [need[i:i + chunk] for i in range(0, len(need), chunk)]
+        for ci, ch in enumerate(chunks, 1):
+            syms = [n[1] for n in ch]
+            print(f"  [batch {ci}/{len(chunks)}] {len(syms)} 标的", flush=True)
+            data.update(run_kline(syms, min_start, today))
     else:
         data = {}
         for name, sym, label, last, start in need:
@@ -184,8 +190,8 @@ def main():
     all_sum = {}
     # 1. 指数（批量）
     all_sum.update(refresh_group(INDICES, "指数 idx_* (批量)", batch=True))
-    # 2. 观察池个股（批量）
-    all_sum.update(refresh_group(STOCKS, "观察池24只个股 (批量)", batch=True))
+    # 2. B3 72 池个股（动态生成, 批量分块）
+    all_sum.update(refresh_group(STOCKS, "B3 72池个股 (批量)", batch=True))
     # 3. 现金ETF（单股, 批量接口混入报KLINE_006）
     all_sum.update(refresh_group([CASH_ETF], "现金ETF etf_159650 (单股)", batch=False))
 
